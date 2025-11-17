@@ -7,7 +7,6 @@ import br.gov.caixa.painelinvestimentos.model.entity.SimulacaoEntity;
 import br.gov.caixa.painelinvestimentos.repository.ProdutoRepository;
 import br.gov.caixa.painelinvestimentos.repository.SimulacaoRepository;
 import org.junit.jupiter.api.Test;
-import org.mockito.ArgumentCaptor;
 
 import java.util.Optional;
 
@@ -51,6 +50,11 @@ class SimulacaoServiceTest {
         assertEquals(1L, response.getClienteId());
         assertEquals(10L, response.getSimulacaoId());
         assertEquals(1000.0, response.getValorInvestido());
+
+        // opcional, mas legal para garantir interação
+        verify(produtoRepository).findById(1L);
+        verify(simulacaoRepository).save(any(SimulacaoEntity.class));
+        verifyNoMoreInteractions(produtoRepository, simulacaoRepository);
     }
 
     @Test
@@ -71,5 +75,8 @@ class SimulacaoServiceTest {
 
         assertThrows(IllegalArgumentException.class, () ->
                 service.simular(request));
+
+        verify(produtoRepository).findById(99L);
+        verifyNoInteractions(simulacaoRepository);
     }
 }
