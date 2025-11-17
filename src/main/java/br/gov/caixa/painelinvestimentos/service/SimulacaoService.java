@@ -28,7 +28,9 @@ public class SimulacaoService {
     public SimulacaoResponseDTO simular(SimulacaoRequestDTO request) {
 
         ProdutoEntity produto = produtoRepository.findById(request.getProdutoId())
-                .orElseThrow(() -> new IllegalArgumentException("Produto não encontrado"));
+                .orElseThrow(() -> new IllegalArgumentException(
+        "Produto não encontrado para o id " + request.getProdutoId()));
+
 
         // Regra de simulação:
         // valorFinal = valorInvestido * (1 + rentabilidade/100) ^ prazoMeses
