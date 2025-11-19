@@ -2,7 +2,6 @@ package br.gov.caixa.painelinvestimentos.service;
 
 import br.gov.caixa.painelinvestimentos.model.PerfilRisco;
 import br.gov.caixa.painelinvestimentos.model.dto.ProdutoRecomendadoDTO;
-import br.gov.caixa.painelinvestimentos.model.dto.PerfilRiscoResponseDTO;
 import br.gov.caixa.painelinvestimentos.model.entity.ProdutoEntity;
 import br.gov.caixa.painelinvestimentos.repository.ProdutoRepository;
 import org.springframework.stereotype.Service;
@@ -14,33 +13,30 @@ import java.util.List;
 @Service
 public class RecomendacaoService {
 
-    private final PerfilRiscoService perfilRiscoService;
     private final ProdutoRepository produtoRepository;
 
-    public RecomendacaoService(PerfilRiscoService perfilRiscoService,
-                               ProdutoRepository produtoRepository) {
-        this.perfilRiscoService = perfilRiscoService;
+    public RecomendacaoService(ProdutoRepository produtoRepository) {
         this.produtoRepository = produtoRepository;
     }
 
-    public List<ProdutoRecomendadoDTO> recomendar(Long clienteId) {
-        PerfilRiscoResponseDTO perfil = perfilRiscoService.calcularPerfil(clienteId);
+    public List<ProdutoRecomendadoDTO> recomendarPorPerfil(String perfilTexto) {
+        PerfilRisco perfil = parsePerfil(perfilTexto);
+        return gerarRecomendacoes(perfil);
+    }
 
+    private List<ProdutoRecomendadoDTO> gerarRecomendacoes(PerfilRisco perfil) {
         List<ProdutoEntity> produtos = produtoRepository.findAll();
         List<ProdutoRecomendadoDTO> recomendados = new ArrayList<>();
 
-        for (ProdutoEntity p : produtos) {
-            if (produtoCompatívelComPerfil(perfil.getPerfil(), p)) {
+        for (ProdutoEntity produto : produtos) {
+            if (produtoCompativelComPerfil(perfil, produto)) {
                 ProdutoRecomendadoDTO dto = new ProdutoRecomendadoDTO();
-                dto.setId(p.getId());
-                dto.setNome(p.getNome());
-                dto.setTipo(p.getTipo());
-                dto.setRisco(p.getRisco());
-                dto.setRentabilidade(p.getRentabilidade());
-
-                // pontuação = rentabilidade * fator de match com o perfil
-                dto.setPontuacao(calcularPontuacao(perfil.getPerfil(), p));
-
+                dto.setId(produto.getId());
+                dto.setNome(produto.getNome());
+                dto.setTipo(produto.getTipo());
+                dto.setRisco(produto.getRisco());
+                dto.setRentabilidade(produto.getRentabilidade());
+                dto.setPontuacao(calcularPontuacao(perfil, produto));
                 recomendados.add(dto);
             }
         }
@@ -49,21 +45,29 @@ public class RecomendacaoService {
         return recomendados;
     }
 
-    private boolean produtoCompatívelComPerfil(PerfilRisco perfil, ProdutoEntity produto) {
+    private boolean produtoCompativelComPerfil(PerfilRisco perfil, ProdutoEntity produto) {
         return switch (perfil) {
-            case CONSERVADOR -> produto.getRisco().equals("BAIXO");
-            case MODERADO -> produto.getRisco().equals("BAIXO") || produto.getRisco().equals("MEDIO");
+            case CONSERVADOR -> produto.getRisco().equalsIgnoreCase("BAIXO");
+            case MODERADO -> produto.getRisco().equalsIgnoreCase("BAIXO") ||
+                             produto.getRisco().equalsIgnoreCase("MEDIO");
             case AGRESSIVO -> true;
         };
     }
 
     private double calcularPontuacao(PerfilRisco perfil, ProdutoEntity produto) {
         double base = produto.getRentabilidade();
-
         return switch (perfil) {
             case CONSERVADOR -> base * 0.8;
-            case MODERADO -> base * 1.0;
+            case MODERADO -> base;
             case AGRESSIVO -> base * 1.2;
         };
+    }
+
+    private PerfilRisco parsePerfil(String valor) {
+        try {
+            return PerfilRisco.valueOf(valor.toUpperCase());
+        } catch (IllegalArgumentException ex) {
+            throw new IllegalArgumentException("Perfil inválido. Utilize CONSERVADOR, MODERADO ou AGRESSIVO.");
+        }
     }
 }

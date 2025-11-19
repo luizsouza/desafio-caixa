@@ -1,86 +1,62 @@
 package br.gov.caixa.painelinvestimentos.service;
 
-import br.gov.caixa.painelinvestimentos.model.PerfilRisco;
-import br.gov.caixa.painelinvestimentos.model.dto.PerfilRiscoResponseDTO;
 import br.gov.caixa.painelinvestimentos.model.dto.ProdutoRecomendadoDTO;
 import br.gov.caixa.painelinvestimentos.model.entity.ProdutoEntity;
 import br.gov.caixa.painelinvestimentos.repository.ProdutoRepository;
+import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
+import org.mockito.InjectMocks;
+import org.mockito.Mock;
+import org.mockito.junit.jupiter.MockitoExtension;
 
 import java.util.List;
 
-import static org.junit.jupiter.api.Assertions.*;
-import static org.mockito.Mockito.*;
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.assertThatThrownBy;
+import static org.mockito.Mockito.when;
 
+@ExtendWith(MockitoExtension.class)
 class RecomendacaoServiceTest {
 
+    @Mock
+    private ProdutoRepository produtoRepository;
+
+    @InjectMocks
+    private RecomendacaoService recomendacaoService;
+
     @Test
-    void deveRecomendarSomenteProdutosCompatíveisComPerfilConservador() {
-        // mocks
-        PerfilRiscoService perfilRiscoService = mock(PerfilRiscoService.class);
-        ProdutoRepository produtoRepository = mock(ProdutoRepository.class);
+    @DisplayName("Deve recomendar apenas produtos compatíveis com perfil conservador")
+    void shouldFilterConservativeProducts() {
+        when(produtoRepository.findAll()).thenReturn(criarProdutos());
 
-        // perfil calculado como CONSERVADOR
-        PerfilRiscoResponseDTO perfil = new PerfilRiscoResponseDTO();
-        perfil.setClienteId(1L);
-        perfil.setPerfil(PerfilRisco.CONSERVADOR);
-        perfil.setPontuacaoTotal(10);
+        List<ProdutoRecomendadoDTO> recomendados = recomendacaoService.recomendarPorPerfil("conservador");
 
-        when(perfilRiscoService.calcularPerfil(1L)).thenReturn(perfil);
-
-        // produtos disponíveis
-        ProdutoEntity conservador = new ProdutoEntity();
-        conservador.setId(1L);
-        conservador.setNome("CDB Conservador");
-        conservador.setTipo("CDB");
-        conservador.setRisco("BAIXO");
-        conservador.setRentabilidade(0.8);
-
-        ProdutoEntity moderado = new ProdutoEntity();
-        moderado.setId(2L);
-        moderado.setNome("Fundo Moderado");
-        moderado.setTipo("FUNDO");
-        moderado.setRisco("MEDIO");
-        moderado.setRentabilidade(1.2);
-
-        ProdutoEntity arrojado = new ProdutoEntity();
-        arrojado.setId(3L);
-        arrojado.setNome("Ações Arrojadas");
-        arrojado.setTipo("ACOES");
-        arrojado.setRisco("ALTO");
-        arrojado.setRentabilidade(2.0);
-
-        when(produtoRepository.findAll())
-                .thenReturn(List.of(conservador, moderado, arrojado));
-
-        RecomendacaoService service = new RecomendacaoService(perfilRiscoService, produtoRepository);
-
-        // act
-        List<ProdutoRecomendadoDTO> recomendados = service.recomendar(1L);
-
-        // assert
-        assertNotNull(recomendados);
-        assertEquals(1, recomendados.size(), "Cliente conservador deve receber apenas produtos de risco BAIXO");
-
-        ProdutoRecomendadoDTO r = recomendados.get(0);
-        assertEquals(1L, r.getId());
-        assertEquals("CDB Conservador", r.getNome());
-        assertEquals("BAIXO", r.getRisco());
+        assertThat(recomendados).hasSize(1);
+        assertThat(recomendados.get(0).getNome()).isEqualTo("CDB Conservador");
     }
 
     @Test
-    void deveOrdenarProdutosPorPontuacaoParaPerfilAgressivo() {
-        // mocks
-        PerfilRiscoService perfilRiscoService = mock(PerfilRiscoService.class);
-        ProdutoRepository produtoRepository = mock(ProdutoRepository.class);
+    @DisplayName("Perfis agressivos devem ordenar produtos pela maior pontuação")
+    void shouldSortForAggressiveProfile() {
+        when(produtoRepository.findAll()).thenReturn(criarProdutos());
 
-        PerfilRiscoResponseDTO perfil = new PerfilRiscoResponseDTO();
-        perfil.setClienteId(2L);
-        perfil.setPerfil(PerfilRisco.AGRESSIVO);
-        perfil.setPontuacaoTotal(80);
+        List<ProdutoRecomendadoDTO> recomendados = recomendacaoService.recomendarPorPerfil("agressivo");
 
-        when(perfilRiscoService.calcularPerfil(2L)).thenReturn(perfil);
+        assertThat(recomendados).hasSize(3);
+        assertThat(recomendados.get(0).getNome()).isEqualTo("Acoes Arrojadas");
+        assertThat(recomendados.get(2).getNome()).isEqualTo("CDB Conservador");
+    }
 
+    @Test
+    @DisplayName("Perfis inválidos devem disparar IllegalArgumentException")
+    void shouldRejectInvalidProfile() {
+        assertThatThrownBy(() -> recomendacaoService.recomendarPorPerfil("desconhecido"))
+                .isInstanceOf(IllegalArgumentException.class)
+                .hasMessageContaining("Perfil");
+    }
+
+    private List<ProdutoEntity> criarProdutos() {
         ProdutoEntity conservador = new ProdutoEntity();
         conservador.setId(1L);
         conservador.setNome("CDB Conservador");
@@ -95,31 +71,13 @@ class RecomendacaoServiceTest {
         moderado.setRisco("MEDIO");
         moderado.setRentabilidade(1.2);
 
-        ProdutoEntity arrojado = new ProdutoEntity();
-        arrojado.setId(3L);
-        arrojado.setNome("Ações Arrojadas");
-        arrojado.setTipo("ACOES");
-        arrojado.setRisco("ALTO");
-        arrojado.setRentabilidade(2.0);
+        ProdutoEntity agressivo = new ProdutoEntity();
+        agressivo.setId(3L);
+        agressivo.setNome("Acoes Arrojadas");
+        agressivo.setTipo("ACOES");
+        agressivo.setRisco("ALTO");
+        agressivo.setRentabilidade(2.0);
 
-        when(produtoRepository.findAll())
-                .thenReturn(List.of(conservador, moderado, arrojado));
-
-        RecomendacaoService service = new RecomendacaoService(perfilRiscoService, produtoRepository);
-
-        // act
-        List<ProdutoRecomendadoDTO> recomendados = service.recomendar(2L);
-
-        // assert
-        assertEquals(3, recomendados.size(), "Agressivo pode receber todos os produtos");
-
-        // ordenação: maior pontuação primeiro -> maior rentabilidade
-        assertEquals("Ações Arrojadas", recomendados.get(0).getNome());
-        assertEquals("Fundo Moderado", recomendados.get(1).getNome());
-        assertEquals("CDB Conservador", recomendados.get(2).getNome());
-
-        // sanity check das pontuações (não precisa ser exato, mas crescente/decrescente)
-        assertTrue(recomendados.get(0).getPontuacao() >= recomendados.get(1).getPontuacao());
-        assertTrue(recomendados.get(1).getPontuacao() >= recomendados.get(2).getPontuacao());
+        return List.of(conservador, moderado, agressivo);
     }
 }

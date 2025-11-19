@@ -17,22 +17,34 @@ public class ProdutoService {
         this.produtoRepository = produtoRepository;
     }
 
+    /**
+     * Lista todos os produtos disponíveis
+     */
     public List<ProdutoDTO> listarTodos() {
-        List<ProdutoEntity> entidades = produtoRepository.findAll();
-        return entidades.stream().map(this::toDTO).collect(Collectors.toList());
+        return produtoRepository.findAll().stream()
+                .map(this::toDTO)
+                .collect(Collectors.toList());
     }
 
+    /**
+     * Busca único produto por ID
+     */
+    public ProdutoDTO buscarPorId(Long id) {
+        ProdutoEntity entity = produtoRepository.findById(id)
+                .orElseThrow(() -> new IllegalArgumentException("Produto não encontrado: " + id));
+        return toDTO(entity);
+    }
+
+    /**
+     * Conversão de Entity → DTO
+     */
     private ProdutoDTO toDTO(ProdutoEntity entity) {
         ProdutoDTO dto = new ProdutoDTO();
         dto.setId(entity.getId());
         dto.setNome(entity.getNome());
         dto.setTipo(entity.getTipo());
-        dto.setRisco(entity.getRisco());
         dto.setRentabilidade(entity.getRentabilidade());
-        dto.setMinValor(entity.getMinValor());
-        dto.setMaxValor(entity.getMaxValor());
-        dto.setMinPrazo(entity.getMinPrazo());
-        dto.setMaxPrazo(entity.getMaxPrazo());
+        dto.setRisco(entity.getRisco());
         return dto;
     }
 }

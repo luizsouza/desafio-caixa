@@ -1,5 +1,6 @@
 package br.gov.caixa.painelinvestimentos.model.entity;
 
+import br.gov.caixa.painelinvestimentos.model.converter.LocalDateTimeConverter;
 import jakarta.persistence.*;
 import java.io.Serializable;
 import java.time.LocalDateTime;
@@ -24,6 +25,7 @@ public class SimulacaoEntity implements Serializable {
 
     private Integer prazoMeses;
 
+    @Convert(converter = LocalDateTimeConverter.class)
     private LocalDateTime dataSimulacao;
 
     public SimulacaoEntity() {}

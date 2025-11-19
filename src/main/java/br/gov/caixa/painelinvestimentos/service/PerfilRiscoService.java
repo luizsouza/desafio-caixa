@@ -1,5 +1,6 @@
 package br.gov.caixa.painelinvestimentos.service;
 
+import br.gov.caixa.painelinvestimentos.exception.SemDadosPerfilException;
 import br.gov.caixa.painelinvestimentos.model.PerfilRisco;
 import br.gov.caixa.painelinvestimentos.model.dto.PerfilRiscoResponseDTO;
 import br.gov.caixa.painelinvestimentos.model.entity.SimulacaoEntity;
@@ -20,16 +21,10 @@ public class PerfilRiscoService {
     public PerfilRiscoResponseDTO calcularPerfil(Long clienteId) {
         List<SimulacaoEntity> simulacoes = simulacaoRepository.findByClienteId(clienteId);
 
-        // Sem histórico: assume conservador
         if (simulacoes.isEmpty()) {
-            PerfilRiscoResponseDTO dto = new PerfilRiscoResponseDTO();
-            dto.setClienteId(clienteId);
-            dto.setPerfil(PerfilRisco.CONSERVADOR);
-            dto.setPontuacaoVolume(0);
-            dto.setPontuacaoFrequencia(0);
-            dto.setPontuacaoLiquidez(0);
-            dto.setPontuacaoTotal(0);
-            return dto;
+            throw new SemDadosPerfilException(
+                    "Nao encontramos simulacoes para o cliente " + clienteId
+                            + ". Realize ao menos uma simulacao para obter o perfil de risco.");
         }
 
         int pontVolume = calcularPontuacaoVolume(simulacoes);
@@ -54,6 +49,7 @@ public class PerfilRiscoService {
         dto.setPontuacaoFrequencia(pontFreq);
         dto.setPontuacaoLiquidez(pontLiquidez);
         dto.setPontuacaoTotal(total);
+        dto.setDescricao(descricaoPerfil(perfil));
         return dto;
     }
 
@@ -76,11 +72,11 @@ public class PerfilRiscoService {
         int quantidade = simulacoes.size();
 
         if (quantidade <= 2) {
-            return 10; // baixa frequência
+            return 10;
         } else if (quantidade <= 5) {
-            return 20; // média
+            return 20;
         } else {
-            return 30; // alta
+            return 30;
         }
     }
 
@@ -92,11 +88,19 @@ public class PerfilRiscoService {
         double prazoMedio = somaPrazo / simulacoes.size();
 
         if (prazoMedio <= 6) {
-            return 10; // prefere liquidez
+            return 10;
         } else if (prazoMedio <= 18) {
-            return 20; // equilibrado
+            return 20;
         } else {
-            return 30; // aceita menos liquidez em troca de rentabilidade
+            return 30;
         }
+    }
+
+    private String descricaoPerfil(PerfilRisco perfil) {
+        return switch (perfil) {
+            case CONSERVADOR -> "Conservador: baixa movimentacao e foco em liquidez.";
+            case MODERADO -> "Moderado: equilibrio entre liquidez e rentabilidade.";
+            case AGRESSIVO -> "Agressivo: busca por maior rentabilidade assumindo mais risco.";
+        };
     }
 }

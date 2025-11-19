@@ -7,7 +7,7 @@ import org.springframework.boot.test.context.SpringBootTest;
 class PainelInvestimentosApplicationTest {
 
     @Test
-    void contextoDeveCarregarSemErros() {
-        // se o contexto subir, o teste passa
+    void contextLoads() {
+        // Verifica se o contexto do Spring Boot sobe sem falhas.
     }
 }

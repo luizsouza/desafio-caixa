@@ -1,82 +1,143 @@
 package br.gov.caixa.painelinvestimentos.service;
 
-import br.gov.caixa.painelinvestimentos.model.dto.SimulacaoRequestDTO;
-import br.gov.caixa.painelinvestimentos.model.dto.SimulacaoResponseDTO;
+import br.gov.caixa.painelinvestimentos.model.dto.SimularInvestimentoRequestDTO;
+import br.gov.caixa.painelinvestimentos.model.dto.SimularInvestimentoResponseDTO;
+import br.gov.caixa.painelinvestimentos.model.dto.SimulacaoHistoricoDTO;
+import br.gov.caixa.painelinvestimentos.model.dto.SimulacoesPorProdutoDiaDTO;
 import br.gov.caixa.painelinvestimentos.model.entity.ProdutoEntity;
 import br.gov.caixa.painelinvestimentos.model.entity.SimulacaoEntity;
+import br.gov.caixa.painelinvestimentos.repository.InvestimentoRepository;
 import br.gov.caixa.painelinvestimentos.repository.ProdutoRepository;
 import br.gov.caixa.painelinvestimentos.repository.SimulacaoRepository;
+import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
+import org.mockito.ArgumentCaptor;
+import org.mockito.InjectMocks;
+import org.mockito.Mock;
+import org.mockito.junit.jupiter.MockitoExtension;
+import org.springframework.data.domain.Sort;
 
+import java.time.LocalDate;
+import java.time.LocalDateTime;
+import java.util.List;
 import java.util.Optional;
 
-import static org.junit.jupiter.api.Assertions.*;
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.Mockito.*;
+import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.when;
 
+@ExtendWith(MockitoExtension.class)
 class SimulacaoServiceTest {
 
+    @Mock
+    private ProdutoRepository produtoRepository;
+    @Mock
+    private SimulacaoRepository simulacaoRepository;
+    @Mock
+    private InvestimentoRepository investimentoRepository;
+    @InjectMocks
+    private SimulacaoService simulacaoService;
+
     @Test
-    void deveSimularInvestimentoComSucesso() {
-        ProdutoRepository produtoRepository = mock(ProdutoRepository.class);
-        SimulacaoRepository simulacaoRepository = mock(SimulacaoRepository.class);
-
-        ProdutoEntity produto = new ProdutoEntity();
-        produto.setId(1L);
-        produto.setNome("CDB");
-        produto.setRentabilidade(1.0);
-
-        when(produtoRepository.findById(1L))
+    @DisplayName("Deve realizar uma simulação válida, persistir o resultado e registrar o histórico do cliente")
+    void shouldSimulateInvestment() {
+        ProdutoEntity produto = produto();
+        when(produtoRepository.findByTipoIgnoreCase("CDB"))
                 .thenReturn(Optional.of(produto));
 
-        when(simulacaoRepository.save(any(SimulacaoEntity.class)))
-                .thenAnswer(inv -> {
-                    SimulacaoEntity s = inv.getArgument(0);
-                    s.setId(10L);
-                    return s;
-                });
-
-        SimulacaoService service = new SimulacaoService(produtoRepository, simulacaoRepository);
-
-        SimulacaoRequestDTO request = new SimulacaoRequestDTO();
-        request.setClienteId(1L);
-        request.setProdutoId(1L);
-        request.setValorInvestido(1000.0);
+        SimularInvestimentoRequestDTO request = new SimularInvestimentoRequestDTO();
+        request.setClienteId(10L);
+        request.setValor(5000.0);
         request.setPrazoMeses(12);
+        request.setTipoProduto("CDB");
 
-        SimulacaoResponseDTO response = service.simular(request);
+        SimularInvestimentoResponseDTO response = simulacaoService.simularInvestimento(request);
 
-        assertNotNull(response);
-        assertEquals(1L, response.getClienteId());
-        assertEquals(10L, response.getSimulacaoId());
-        assertEquals(1000.0, response.getValorInvestido());
+        assertThat(response.getProdutoValidado().getNome()).isEqualTo("Produto Teste");
+        assertThat(response.getResultadoSimulacao().getValorFinal()).isGreaterThan(5000);
+        assertThat(response.getDataSimulacao()).isNotNull();
 
-        // opcional, mas legal para garantir interação
-        verify(produtoRepository).findById(1L);
-        verify(simulacaoRepository).save(any(SimulacaoEntity.class));
-        verifyNoMoreInteractions(produtoRepository, simulacaoRepository);
+        ArgumentCaptor<SimulacaoEntity> captor = ArgumentCaptor.forClass(SimulacaoEntity.class);
+        verify(simulacaoRepository).save(captor.capture());
+        assertThat(captor.getValue().getClienteId()).isEqualTo(10L);
+        assertThat(captor.getValue().getValorFinal()).isGreaterThan(5000);
+        verify(investimentoRepository).save(any());
     }
 
     @Test
-    void deveLancarExcecaoQuandoProdutoNaoExiste() {
-        ProdutoRepository produtoRepository = mock(ProdutoRepository.class);
-        SimulacaoRepository simulacaoRepository = mock(SimulacaoRepository.class);
-
-        when(produtoRepository.findById(99L))
+    @DisplayName("Deve informar quando o tipo de produto não existe")
+    void shouldRejectUnknownProductType() {
+        when(produtoRepository.findByTipoIgnoreCase("desconhecido"))
                 .thenReturn(Optional.empty());
 
-        SimulacaoService service = new SimulacaoService(produtoRepository, simulacaoRepository);
-
-        SimulacaoRequestDTO request = new SimulacaoRequestDTO();
-        request.setClienteId(1L);
-        request.setProdutoId(99L);
-        request.setValorInvestido(1000.0);
+        SimularInvestimentoRequestDTO request = new SimularInvestimentoRequestDTO();
+        request.setClienteId(10L);
+        request.setValor(5000.0);
         request.setPrazoMeses(12);
+        request.setTipoProduto("desconhecido");
 
-        assertThrows(IllegalArgumentException.class, () ->
-                service.simular(request));
+        assertThatThrownBy(() -> simulacaoService.simularInvestimento(request))
+                .isInstanceOf(IllegalArgumentException.class)
+                .hasMessageContaining("Tipo de produto");
+    }
 
-        verify(produtoRepository).findById(99L);
-        verifyNoInteractions(simulacaoRepository);
+    @Test
+    @DisplayName("Listar histórico deve manter dados essenciais")
+    void shouldListHistory() {
+        ProdutoEntity produto = produto();
+        SimulacaoEntity entity = new SimulacaoEntity();
+        entity.setId(1L);
+        entity.setClienteId(5L);
+        entity.setProduto(produto);
+        entity.setValorInvestido(2000.0);
+        entity.setValorFinal(2100.0);
+        entity.setPrazoMeses(6);
+        entity.setDataSimulacao(LocalDateTime.now());
+
+        when(simulacaoRepository.findAll(any(Sort.class))).thenReturn(List.of(entity));
+
+        List<SimulacaoHistoricoDTO> historico = simulacaoService.listarHistorico();
+
+        assertThat(historico).hasSize(1);
+        assertThat(historico.get(0).getProduto()).isEqualTo("Produto Teste");
+    }
+
+    @Test
+    @DisplayName("Deve agrupar simulações por produto em um dia")
+    void shouldGroupSimulationsByDay() {
+        ProdutoEntity produto = produto();
+        SimulacaoEntity a = new SimulacaoEntity();
+        a.setProduto(produto);
+        a.setValorInvestido(2000.0);
+        a.setValorFinal(2200.0);
+        SimulacaoEntity b = new SimulacaoEntity();
+        b.setProduto(produto);
+        b.setValorInvestido(4000.0);
+        b.setValorFinal(4400.0);
+
+        when(simulacaoRepository.findByDataSimulacaoBetween(any(), any()))
+                .thenReturn(List.of(a, b));
+
+        List<SimulacoesPorProdutoDiaDTO> resposta =
+                simulacaoService.buscarSimulacoesPorProdutoNoDia(LocalDate.parse("2025-10-30"));
+
+        assertThat(resposta).hasSize(1);
+        SimulacoesPorProdutoDiaDTO dto = resposta.get(0);
+        assertThat(dto.getProduto()).isEqualTo("Produto Teste");
+        assertThat(dto.getQuantidadeSimulacoes()).isEqualTo(2);
+        assertThat(dto.getMediaValorFinal()).isEqualTo(3000.0);
+    }
+
+    private ProdutoEntity produto() {
+        ProdutoEntity produto = new ProdutoEntity();
+        produto.setId(1L);
+        produto.setNome("Produto Teste");
+        produto.setTipo("CDB");
+        produto.setRentabilidade(0.12);
+        produto.setRisco("BAIXO");
+        return produto;
     }
 }
