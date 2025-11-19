@@ -124,13 +124,13 @@ public class SimulacaoService {
 
     private void registrarInvestimentoHistorico(SimularInvestimentoRequestDTO request,
                                                 ProdutoEntity produto,
-                                                LocalDateTime dataSimulacao) {
+                                                LocalDateTime dataHoraSimulacao) {
         InvestimentoClienteEntity investimento = new InvestimentoClienteEntity();
         investimento.setClienteId(request.getClienteId());
         investimento.setTipo(produto.getTipo());
         investimento.setValor(request.getValor());
         investimento.setRentabilidade(produto.getRentabilidade());
-        investimento.setData(dataSimulacao.toLocalDate());
+        investimento.setData(dataHoraSimulacao.toLocalDate()); // Garante que apenas a data seja salva
         investimentoRepository.save(investimento);
     }
 
