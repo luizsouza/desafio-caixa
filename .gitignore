@@ -27,3 +27,7 @@ logs/
 # Banco local
 *.db
 *.sqlite
+
+# Permite versionar o banco padrao
+!data/
+!data/*.db
