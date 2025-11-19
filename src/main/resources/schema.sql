@@ -72,7 +72,7 @@ CREATE TABLE IF NOT EXISTS investimentos_cliente (
     tipo            TEXT NOT NULL,
     valor           REAL NOT NULL,
     rentabilidade   REAL NOT NULL,
-    data            TEXT NOT NULL
+    data            DATE NOT NULL
 );
 
 CREATE INDEX IF NOT EXISTS idx_investimentos_cliente ON investimentos_cliente (cliente_id);

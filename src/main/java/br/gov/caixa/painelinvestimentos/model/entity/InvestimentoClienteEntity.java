@@ -40,6 +40,6 @@ public class InvestimentoClienteEntity implements Serializable {
     public Double getRentabilidade() { return rentabilidade; }
     public void setRentabilidade(Double rentabilidade) { this.rentabilidade = rentabilidade; }
 
-    public LocalDate getData() { return data; }
-    public void setData(LocalDate data) { this.data = data; }
+    public java.time.LocalDate getData() { return data; }
+    public void setData(java.time.LocalDate data) { this.data = data; }
 }
