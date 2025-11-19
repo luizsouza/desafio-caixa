@@ -1,35 +1,61 @@
 package br.gov.caixa.painelinvestimentos.model.entity;
 
+import br.gov.caixa.painelinvestimentos.model.converter.LocalDateTimeConverter;
 import jakarta.persistence.*;
-import java.io.Serializable;
 import java.time.LocalDateTime;
 
 @Entity
 @Table(name = "telemetria")
-public class TelemetriaEntity implements Serializable {
+public class TelemetriaEntity {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    private String servico;
+    @Column(nullable = false)
+    private String endpoint;
 
+    @Column(name = "tempo_resposta_ms", nullable = false)
     private Long tempoRespostaMs;
 
-    private LocalDateTime dataChamada;
+    @Column(nullable = false)
+    @Convert(converter = LocalDateTimeConverter.class)
+    private LocalDateTime timestamp;
 
     public TelemetriaEntity() {}
 
-    // getters/setters
-    public Long getId() { return id; }
-    public void setId(Long id) { this.id = id; }
+    public TelemetriaEntity(String endpoint, Long tempoRespostaMs, LocalDateTime timestamp) {
+        this.endpoint = endpoint;
+        this.tempoRespostaMs = tempoRespostaMs;
+        this.timestamp = timestamp;
+    }
 
-    public String getServico() { return servico; }
-    public void setServico(String servico) { this.servico = servico; }
+    // GETTERS & SETTERS
+    public Long getId() {
+        return id;
+    }
+    public void setId(Long id) {
+        this.id = id;
+    }
 
-    public Long getTempoRespostaMs() { return tempoRespostaMs; }
-    public void setTempoRespostaMs(Long tempoRespostaMs) { this.tempoRespostaMs = tempoRespostaMs; }
+    public String getEndpoint() {
+        return endpoint;
+    }
+    public void setEndpoint(String endpoint) {
+        this.endpoint = endpoint;
+    }
 
-    public LocalDateTime getDataChamada() { return dataChamada; }
-    public void setDataChamada(LocalDateTime dataChamada) { this.dataChamada = dataChamada; }
+    public Long getTempoRespostaMs() {
+        return tempoRespostaMs;
+    }
+    public void setTempoRespostaMs(Long tempoRespostaMs) {
+        this.tempoRespostaMs = tempoRespostaMs;
+    }
+
+    public LocalDateTime getTimestamp() {
+        return timestamp;
+    }
+    public void setTimestamp(LocalDateTime timestamp) {
+        this.timestamp = timestamp;
+    }
 }

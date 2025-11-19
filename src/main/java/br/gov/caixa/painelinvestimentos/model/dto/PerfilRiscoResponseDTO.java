@@ -10,6 +10,7 @@ public class PerfilRiscoResponseDTO {
     private int pontuacaoVolume;
     private int pontuacaoFrequencia;
     private int pontuacaoLiquidez;
+    private String descricao;
 
     public Long getClienteId() {
         return clienteId;
@@ -57,5 +58,13 @@ public class PerfilRiscoResponseDTO {
 
     public void setPontuacaoLiquidez(int pontuacaoLiquidez) {
         this.pontuacaoLiquidez = pontuacaoLiquidez;
+    }
+
+    public String getDescricao() {
+        return descricao;
+    }
+
+    public void setDescricao(String descricao) {
+        this.descricao = descricao;
     }
 }

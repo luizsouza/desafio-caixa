@@ -23,21 +23,8 @@ public class ProdutoEntity implements Serializable {
     @Column(nullable = false)
     private String risco;
 
-    @Column(nullable = false)
-    private Double minValor;
-
-    @Column(nullable = false)
-    private Double maxValor;
-
-    @Column(nullable = false)
-    private Integer minPrazo;
-
-    @Column(nullable = false)
-    private Integer maxPrazo;
-
     public ProdutoEntity() {}
 
-    // getters e setters
     public Long getId() { return id; }
     public void setId(Long id) { this.id = id; }
 
@@ -53,15 +40,4 @@ public class ProdutoEntity implements Serializable {
     public String getRisco() { return risco; }
     public void setRisco(String risco) { this.risco = risco; }
 
-    public Double getMinValor() { return minValor; }
-    public void setMinValor(Double minValor) { this.minValor = minValor; }
-
-    public Double getMaxValor() { return maxValor; }
-    public void setMaxValor(Double maxValor) { this.maxValor = maxValor; }
-
-    public Integer getMinPrazo() { return minPrazo; }
-    public void setMinPrazo(Integer minPrazo) { this.minPrazo = minPrazo; }
-
-    public Integer getMaxPrazo() { return maxPrazo; }
-    public void setMaxPrazo(Integer maxPrazo) { this.maxPrazo = maxPrazo; }
 }
