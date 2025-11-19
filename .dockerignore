@@ -1,0 +1,7 @@
+target
+.idea
+.vscode
+.git
+.gitignore
+*.iml
+data/*.db-journal
