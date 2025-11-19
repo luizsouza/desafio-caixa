@@ -18,7 +18,7 @@ public class ProdutoService {
     }
 
     /**
-     * Lista todos os produtos disponíveis
+     * Lista todos os produtos disponiveis
      */
     public List<ProdutoDTO> listarTodos() {
         return produtoRepository.findAll().stream()
@@ -27,16 +27,7 @@ public class ProdutoService {
     }
 
     /**
-     * Busca único produto por ID
-     */
-    public ProdutoDTO buscarPorId(Long id) {
-        ProdutoEntity entity = produtoRepository.findById(id)
-                .orElseThrow(() -> new IllegalArgumentException("Produto não encontrado: " + id));
-        return toDTO(entity);
-    }
-
-    /**
-     * Conversão de Entity → DTO
+     * Conversao de Entity para DTO
      */
     private ProdutoDTO toDTO(ProdutoEntity entity) {
         ProdutoDTO dto = new ProdutoDTO();
@@ -48,3 +39,4 @@ public class ProdutoService {
         return dto;
     }
 }
+

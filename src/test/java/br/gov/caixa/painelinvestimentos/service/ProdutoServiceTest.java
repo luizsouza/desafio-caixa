@@ -11,10 +11,7 @@ import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
 import java.util.List;
-import java.util.Optional;
-
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.mockito.Mockito.when;
 
 @ExtendWith(MockitoExtension.class)
@@ -39,21 +36,6 @@ class ProdutoServiceTest {
         assertThat(dto.getId()).isEqualTo(1L);
         assertThat(dto.getNome()).isEqualTo("CDB Caixa");
         assertThat(dto.getTipo()).isEqualTo("CDB");
-    }
-
-    @Test
-    @DisplayName("Deve buscar produto por id e lançar exceção quando não existir")
-    void shouldHandleProductById() {
-        ProdutoEntity entity = criarProduto(2L, "Fundo XPTO", "FUNDO");
-        when(produtoRepository.findById(2L)).thenReturn(Optional.of(entity));
-        when(produtoRepository.findById(99L)).thenReturn(Optional.empty());
-
-        ProdutoDTO dto = produtoService.buscarPorId(2L);
-        assertThat(dto.getNome()).isEqualTo("Fundo XPTO");
-
-        assertThatThrownBy(() -> produtoService.buscarPorId(99L))
-                .isInstanceOf(IllegalArgumentException.class)
-                .hasMessageContaining("99");
     }
 
     private ProdutoEntity criarProduto(Long id, String nome, String tipo) {

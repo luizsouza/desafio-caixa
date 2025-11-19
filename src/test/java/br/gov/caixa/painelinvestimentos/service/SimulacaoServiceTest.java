@@ -42,7 +42,7 @@ class SimulacaoServiceTest {
     private SimulacaoService simulacaoService;
 
     @Test
-    @DisplayName("Deve realizar uma simulação válida, persistir o resultado e registrar o histórico do cliente")
+    @DisplayName("Deve realizar uma simulacao valida, persistir o resultado e registrar o historico do cliente")
     void shouldSimulateInvestment() {
         ProdutoEntity produto = produto();
         when(produtoRepository.findByTipoIgnoreCase("CDB"))
@@ -68,7 +68,7 @@ class SimulacaoServiceTest {
     }
 
     @Test
-    @DisplayName("Deve informar quando o tipo de produto não existe")
+    @DisplayName("Deve informar quando o tipo de produto nao existe")
     void shouldRejectUnknownProductType() {
         when(produtoRepository.findByTipoIgnoreCase("desconhecido"))
                 .thenReturn(Optional.empty());
@@ -85,7 +85,7 @@ class SimulacaoServiceTest {
     }
 
     @Test
-    @DisplayName("Listar histórico deve manter dados essenciais")
+    @DisplayName("Listar historico deve manter dados essenciais")
     void shouldListHistory() {
         ProdutoEntity produto = produto();
         SimulacaoEntity entity = new SimulacaoEntity();
@@ -106,29 +106,34 @@ class SimulacaoServiceTest {
     }
 
     @Test
-    @DisplayName("Deve agrupar simulações por produto em um dia")
+    @DisplayName("Deve agrupar simulacoes por produto e dia usando valor final")
     void shouldGroupSimulationsByDay() {
         ProdutoEntity produto = produto();
         SimulacaoEntity a = new SimulacaoEntity();
         a.setProduto(produto);
-        a.setValorInvestido(2000.0);
         a.setValorFinal(2200.0);
+        a.setDataSimulacao(LocalDateTime.of(2025, 10, 30, 10, 0));
         SimulacaoEntity b = new SimulacaoEntity();
         b.setProduto(produto);
-        b.setValorInvestido(4000.0);
         b.setValorFinal(4400.0);
+        b.setDataSimulacao(LocalDateTime.of(2025, 10, 31, 12, 0));
 
         when(simulacaoRepository.findByDataSimulacaoBetween(any(), any()))
                 .thenReturn(List.of(a, b));
 
         List<SimulacoesPorProdutoDiaDTO> resposta =
-                simulacaoService.buscarSimulacoesPorProdutoNoDia(LocalDate.parse("2025-10-30"));
+                simulacaoService.buscarSimulacoesPorProdutoPorDia(
+                        LocalDate.parse("2025-10-01"),
+                        LocalDate.parse("2025-10-31"));
 
-        assertThat(resposta).hasSize(1);
-        SimulacoesPorProdutoDiaDTO dto = resposta.get(0);
-        assertThat(dto.getProduto()).isEqualTo("Produto Teste");
-        assertThat(dto.getQuantidadeSimulacoes()).isEqualTo(2);
-        assertThat(dto.getMediaValorFinal()).isEqualTo(3000.0);
+        assertThat(resposta).hasSize(2);
+        assertThat(resposta)
+                .extracting(SimulacoesPorProdutoDiaDTO::getData)
+                .containsExactly("2025-10-31", "2025-10-30");
+        SimulacoesPorProdutoDiaDTO dtoMaisRecente = resposta.get(0);
+        assertThat(dtoMaisRecente.getProduto()).isEqualTo("Produto Teste");
+        assertThat(dtoMaisRecente.getQuantidadeSimulacoes()).isEqualTo(1);
+        assertThat(dtoMaisRecente.getMediaValorFinal()).isEqualTo(4400.0);
     }
 
     private ProdutoEntity produto() {

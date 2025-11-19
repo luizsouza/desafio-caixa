@@ -40,7 +40,7 @@ class SimulacaoControllerIT {
     private SimulacaoService simulacaoService;
 
     @Test
-    @DisplayName("POST /simular-investimento deve validar payload e retornar dados da simulação")
+    @DisplayName("POST /simular-investimento deve validar payload e retornar dados da simulacao")
     void shouldSimulateInvestmentViaController() throws Exception {
         SimularInvestimentoResponseDTO response = new SimularInvestimentoResponseDTO();
         ProdutoValidadoDTO produto = new ProdutoValidadoDTO();
@@ -72,7 +72,7 @@ class SimulacaoControllerIT {
     }
 
     @Test
-    @DisplayName("Payloads inválidos devem retornar erro de validação padronizado")
+    @DisplayName("Payloads invalidos devem retornar erro de validacao padronizado")
     void shouldValidateInvalidPayload() throws Exception {
         mockMvc.perform(post("/simular-investimento")
                         .header("Authorization", "Bearer " + jwtService.generateToken("admin"))
@@ -83,7 +83,7 @@ class SimulacaoControllerIT {
     }
 
     @Test
-    @DisplayName("GET /simulacoes/por-produto-dia deve encaminhar data para o serviço")
+    @DisplayName("GET /simulacoes/por-produto-dia deve encaminhar periodo para o servico")
     void shouldForwardDateParameter() throws Exception {
         SimulacoesPorProdutoDiaDTO dto = new SimulacoesPorProdutoDiaDTO();
         dto.setProduto("CDB");
@@ -91,18 +91,21 @@ class SimulacaoControllerIT {
         dto.setQuantidadeSimulacoes(1);
         dto.setMediaValorFinal(2000.0);
 
-        when(simulacaoService.buscarSimulacoesPorProdutoNoDia(any()))
+        when(simulacaoService.buscarSimulacoesPorProdutoPorDia(any(), any()))
                 .thenReturn(List.of(dto));
 
         mockMvc.perform(get("/simulacoes/por-produto-dia")
                         .header("Authorization", "Bearer " + jwtService.generateToken("admin"))
-                        .param("data", "2025-10-30")
+                        .param("inicio", "2025-10-01")
+                        .param("fim", "2025-10-30")
                         .accept(MediaType.APPLICATION_JSON))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$[0].produto").value("CDB"));
 
-        var captor = org.mockito.ArgumentCaptor.forClass(LocalDate.class);
-        verify(simulacaoService).buscarSimulacoesPorProdutoNoDia(captor.capture());
-        assertThat(captor.getValue()).isEqualTo(LocalDate.parse("2025-10-30"));
+        var inicioCaptor = org.mockito.ArgumentCaptor.forClass(LocalDate.class);
+        var fimCaptor = org.mockito.ArgumentCaptor.forClass(LocalDate.class);
+        verify(simulacaoService).buscarSimulacoesPorProdutoPorDia(inicioCaptor.capture(), fimCaptor.capture());
+        assertThat(inicioCaptor.getValue()).isEqualTo(LocalDate.parse("2025-10-01"));
+        assertThat(fimCaptor.getValue()).isEqualTo(LocalDate.parse("2025-10-30"));
     }
 }

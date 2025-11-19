@@ -63,10 +63,14 @@ public class SimulacaoController {
     )
     public ResponseEntity<List<SimulacoesPorProdutoDiaDTO>> porProdutoDia(
             @RequestParam(required = false)
-            @Parameter(description = "Data a consultar no formato AAAA-MM-DD.")
+            @Parameter(description = "Data inicial no formato AAAA-MM-DD.")
             @DateTimeFormat(iso = DateTimeFormat.ISO.DATE)
-            LocalDate data) {
+            LocalDate inicio,
+            @RequestParam(required = false)
+            @Parameter(description = "Data final no formato AAAA-MM-DD.")
+            @DateTimeFormat(iso = DateTimeFormat.ISO.DATE)
+            LocalDate fim) {
 
-        return ResponseEntity.ok(simulacaoService.buscarSimulacoesPorProdutoNoDia(data));
+        return ResponseEntity.ok(simulacaoService.buscarSimulacoesPorProdutoPorDia(inicio, fim));
     }
 }
