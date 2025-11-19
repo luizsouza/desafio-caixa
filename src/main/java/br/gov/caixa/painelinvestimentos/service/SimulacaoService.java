@@ -78,35 +78,48 @@ public class SimulacaoService {
     }
 
     @Transactional(readOnly = true)
-    public List<SimulacoesPorProdutoDiaDTO> buscarSimulacoesPorProdutoNoDia(LocalDate dia) {
-        LocalDate dataConsulta = dia != null ? dia : LocalDate.now();
-        LocalDateTime inicio = dataConsulta.atStartOfDay();
-        LocalDateTime fim = dataConsulta.atTime(LocalTime.MAX);
+    public List<SimulacoesPorProdutoDiaDTO> buscarSimulacoesPorProdutoPorDia(LocalDate inicio, LocalDate fim) {
+        LocalDate fimConsulta = fim != null ? fim : LocalDate.now();
+        LocalDate inicioConsulta = inicio != null ? inicio : fimConsulta.minusDays(30);
 
-        List<SimulacaoEntity> simulacoes = simulacaoRepository.findByDataSimulacaoBetween(inicio, fim);
-
-        Map<ProdutoEntity, List<SimulacaoEntity>> agrupado = simulacoes.stream()
-                .collect(Collectors.groupingBy(SimulacaoEntity::getProduto));
-
-        List<SimulacoesPorProdutoDiaDTO> resposta = new ArrayList<>();
-        for (Map.Entry<ProdutoEntity, List<SimulacaoEntity>> entry : agrupado.entrySet()) {
-            ProdutoEntity produto = entry.getKey();
-            List<SimulacaoEntity> lista = entry.getValue();
-
-            SimulacoesPorProdutoDiaDTO dto = new SimulacoesPorProdutoDiaDTO();
-            dto.setProduto(produto.getNome());
-            dto.setData(dataConsulta.toString());
-            dto.setQuantidadeSimulacoes(lista.size());
-            dto.setMediaValorFinal(
-                    lista.stream()
-                            .mapToDouble(SimulacaoEntity::getValorInvestido)
-                            .average()
-                            .orElse(0.0)
-            );
-            resposta.add(dto);
+        if (inicioConsulta.isAfter(fimConsulta)) {
+            throw new IllegalArgumentException("Data inicial nao pode ser posterior a data final.");
         }
 
-        resposta.sort(Comparator.comparing(SimulacoesPorProdutoDiaDTO::getQuantidadeSimulacoes).reversed());
+        LocalDateTime inicioTimestamp = inicioConsulta.atStartOfDay();
+        LocalDateTime fimTimestamp = fimConsulta.atTime(LocalTime.MAX);
+
+        List<SimulacaoEntity> simulacoes = simulacaoRepository.findByDataSimulacaoBetween(inicioTimestamp, fimTimestamp);
+
+        Map<ProdutoEntity, Map<LocalDate, List<SimulacaoEntity>>> agrupado = simulacoes.stream()
+                .collect(Collectors.groupingBy(
+                        SimulacaoEntity::getProduto,
+                        Collectors.groupingBy(sim -> sim.getDataSimulacao().toLocalDate())
+                ));
+
+        List<SimulacoesPorProdutoDiaDTO> resposta = new ArrayList<>();
+        for (Map.Entry<ProdutoEntity, Map<LocalDate, List<SimulacaoEntity>>> entryProduto : agrupado.entrySet()) {
+            ProdutoEntity produto = entryProduto.getKey();
+            for (Map.Entry<LocalDate, List<SimulacaoEntity>> entryDia : entryProduto.getValue().entrySet()) {
+                List<SimulacaoEntity> lista = entryDia.getValue();
+                SimulacoesPorProdutoDiaDTO dto = new SimulacoesPorProdutoDiaDTO();
+                dto.setProduto(produto.getNome());
+                dto.setData(entryDia.getKey().toString());
+                dto.setQuantidadeSimulacoes(lista.size());
+                dto.setMediaValorFinal(
+                        lista.stream()
+                                .mapToDouble(SimulacaoEntity::getValorFinal)
+                                .average()
+                                .orElse(0.0)
+                );
+                resposta.add(dto);
+            }
+        }
+
+        resposta.sort(Comparator
+                .comparing(SimulacoesPorProdutoDiaDTO::getData).reversed()
+                .thenComparing(SimulacoesPorProdutoDiaDTO::getProduto));
+
         return resposta;
     }
 
