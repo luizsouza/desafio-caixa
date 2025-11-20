@@ -49,6 +49,21 @@ class RecomendacaoServiceTest {
     }
 
     @Test
+    @DisplayName("Perfil moderado deve trazer BAIXO e MEDIO e pontuar igual a rentabilidade")
+    void shouldFilterAndScoreModerateProfile() {
+        when(produtoRepository.findAll()).thenReturn(criarProdutos());
+
+        List<ProdutoRecomendadoDTO> recomendados = recomendacaoService.recomendarPorPerfil("moderado");
+
+        assertThat(recomendados).hasSize(2);
+        assertThat(recomendados)
+                .extracting(ProdutoRecomendadoDTO::getNome)
+                .containsExactly("Fundo Moderado", "CDB Conservador"); // ordenado por pontuacao 1.2 > 0.8
+        assertThat(recomendados.get(0).getPontuacao()).isEqualTo(1.2);
+        assertThat(recomendados.get(1).getPontuacao()).isEqualTo(0.8);
+    }
+
+    @Test
     @DisplayName("Perfis inválidos devem disparar IllegalArgumentException")
     void shouldRejectInvalidProfile() {
         assertThatThrownBy(() -> recomendacaoService.recomendarPorPerfil("desconhecido"))

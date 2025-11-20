@@ -54,6 +54,30 @@ class PerfilRiscoServiceTest {
         assertThat(dto.getDescricao()).contains("Agressivo");
     }
 
+    @Test
+    @DisplayName("Volumes medios, frequencia moderada e prazos intermediarios levam ao perfil moderado")
+    void shouldReturnModerateProfile() {
+        when(simulacaoRepository.findByClienteId(3L))
+                .thenReturn(gerarSimulacoes(4, 10000, 12));
+
+        PerfilRiscoResponseDTO dto = perfilRiscoService.calcularPerfil(3L);
+
+        assertThat(dto.getPerfil()).isEqualTo(PerfilRisco.MODERADO);
+        assertThat(dto.getPontuacaoTotal()).isEqualTo(60);
+    }
+
+    @Test
+    @DisplayName("Volumes baixos, poucas simulacoes e prazos curtos levam ao perfil conservador")
+    void shouldReturnConservativeProfile() {
+        when(simulacaoRepository.findByClienteId(4L))
+                .thenReturn(gerarSimulacoes(1, 5000, 3));
+
+        PerfilRiscoResponseDTO dto = perfilRiscoService.calcularPerfil(4L);
+
+        assertThat(dto.getPerfil()).isEqualTo(PerfilRisco.CONSERVADOR);
+        assertThat(dto.getPontuacaoTotal()).isEqualTo(30);
+    }
+
     private List<SimulacaoEntity> gerarSimulacoes(int quantidade, double valor, int prazo) {
         List<SimulacaoEntity> simulacoes = new ArrayList<>();
         for (int i = 0; i < quantidade; i++) {
