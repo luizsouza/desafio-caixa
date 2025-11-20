@@ -132,6 +132,7 @@ O Banco SQLite (`data/investimentos.db`) está versionado e é montado como volu
 
 - `mvn clean test` executa unitarios e integracoes.
 - Relatorio JaCoCo em `target/site/jacoco/index.html`.
+- Analise estatica: `mvn verify` roda SpotBugs + FindSecBugs (failOnError). O scan de CVEs via OWASP Dependency Check foi removido do build para evitar dependencia de NVD/API na avaliacao.
 - Resumo da suite:
 
 | Classe | Tipo | Cenarios cobertos |
@@ -158,6 +159,6 @@ Evidencias adicionais: Swagger documenta contratos; Dockerfile/docker-compose pe
 1. Clonar/descompactar o projeto.
 2. `docker compose build && docker compose up`.
 3. `POST /auth/login` → copiar token → usar endpoints no Swagger.
-4.  Rodar `mvn clean test` e abrir `target/site/jacoco/index.html` para conferir cobertura.
+4. Rodar `mvn clean test` e abrir `target/site/jacoco/index.html` para conferir cobertura.
 
 Qualquer dúvida sobre o motor, perfil de risco ou arquitetura, estou à disposição. Obrigado pela avaliação! 💙

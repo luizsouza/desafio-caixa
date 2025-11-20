@@ -160,7 +160,7 @@
                 <configuration>
                     <effort>Max</effort>
                     <threshold>Low</threshold>
-                    <failOnError>false</failOnError>
+                    <failOnError>true</failOnError>
                 </configuration>
                 <executions>
                     <execution>
@@ -171,6 +171,7 @@
                     </execution>
                 </executions>
             </plugin>
+
 
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
