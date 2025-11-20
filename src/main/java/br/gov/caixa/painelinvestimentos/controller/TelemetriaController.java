@@ -5,19 +5,25 @@ import br.gov.caixa.painelinvestimentos.model.dto.TelemetriaResponseDTO;
 import br.gov.caixa.painelinvestimentos.service.TelemetriaService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
+import io.swagger.v3.oas.annotations.media.Content;
+import io.swagger.v3.oas.annotations.media.Schema;
+import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.security.SecurityRequirement;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import org.springframework.format.annotation.DateTimeFormat;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.*;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.bind.annotation.RestController;
 
 import java.time.LocalDate;
 
 @RestController
 @RequestMapping("/telemetria")
 @Tag(
-    name = "Telemetria",
-    description = "Painel de acompanhamento do uso da API com filtros por período no formato AAAA-MM-DD."
+        name = "Telemetria",
+        description = "Painel com volume de chamadas e tempo medio de resposta por endpoint."
 )
 @SecurityRequirement(name = OpenApiConfig.BEARER_AUTH_SCHEME)
 public class TelemetriaController {
@@ -28,29 +34,24 @@ public class TelemetriaController {
         this.telemetriaService = telemetriaService;
     }
 
-    /**
-     * GET /telemetria
-     *
-     * Comportamento:
-     * - Se início e fim forem informados → usa os dois
-     * - Se nenhum for informado → últimos 30 dias
-     * - Se informar somente início ou somente fim → últimos 30 dias
-     *
-     */
-    
     @GetMapping
     @Operation(
-        summary = "Métricas de uso",
-        description = "Informe datas no padrão AAAA-MM-DD (ex.: 2025-10-30). Sem filtros, retornamos os últimos 30 dias."
+            summary = "Metricas de uso",
+            description = """
+                    Informa quantas chamadas cada servico recebeu e o tempo medio de resposta.
+                    Inicio/fim sao opcionais (formato AAAA-MM-DD); se nao forem informados, retorna os ultimos 30 dias.
+                    """,
+            responses = @ApiResponse(responseCode = "200",
+                    content = @Content(schema = @Schema(implementation = TelemetriaResponseDTO.class)))
     )
     public ResponseEntity<TelemetriaResponseDTO> obterTelemetria(
             @RequestParam(required = false)
-            @Parameter(description = "Data inicial no formato AAAA-MM-DD.")
+            @Parameter(description = "Data inicial no formato AAAA-MM-DD.", example = "2025-10-01")
             @DateTimeFormat(iso = DateTimeFormat.ISO.DATE)
             LocalDate inicio,
 
             @RequestParam(required = false)
-            @Parameter(description = "Data final no formato AAAA-MM-DD.")
+            @Parameter(description = "Data final no formato AAAA-MM-DD.", example = "2025-10-31")
             @DateTimeFormat(iso = DateTimeFormat.ISO.DATE)
             LocalDate fim
     ) {

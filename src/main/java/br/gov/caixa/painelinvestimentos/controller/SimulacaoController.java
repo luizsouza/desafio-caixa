@@ -8,6 +8,9 @@ import br.gov.caixa.painelinvestimentos.model.dto.SimularInvestimentoResponseDTO
 import br.gov.caixa.painelinvestimentos.service.SimulacaoService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
+import io.swagger.v3.oas.annotations.media.Content;
+import io.swagger.v3.oas.annotations.media.Schema;
+import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.security.SecurityRequirement;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
@@ -25,7 +28,7 @@ import java.util.List;
 @RestController
 @Tag(
         name = "Simulacoes",
-        description = "Executa novas simulacoes e consulta metricas para apoiar o time de produtos."
+        description = "Executa novas simulacoes, lista historicos e expone metricas diarias por produto."
 )
 @SecurityRequirement(name = OpenApiConfig.BEARER_AUTH_SCHEME)
 public class SimulacaoController {
@@ -39,7 +42,13 @@ public class SimulacaoController {
     @PostMapping("/simular-investimento")
     @Operation(
             summary = "Nova simulacao",
-            description = "Processa os dados do cliente e retorna um cenario completo de investimento."
+            description = "Processa os dados do cliente e retorna o produto validado e o resultado da simulacao.",
+            responses = {
+                    @ApiResponse(responseCode = "200", description = "Simulacao realizada",
+                            content = @Content(schema = @Schema(implementation = SimularInvestimentoResponseDTO.class))),
+                    @ApiResponse(responseCode = "400", description = "Payload invalido"),
+                    @ApiResponse(responseCode = "404", description = "Produto nao encontrado para o tipo informado")
+            }
     )
     public ResponseEntity<SimularInvestimentoResponseDTO> simularInvestimento(
             @Valid @RequestBody SimularInvestimentoRequestDTO request) {
@@ -50,7 +59,9 @@ public class SimulacaoController {
     @GetMapping("/simulacoes")
     @Operation(
             summary = "Historico de simulacoes",
-            description = "Traz as ultimas simulacoes realizadas para que analistas possam acompanhar o uso."
+            description = "Retorna todas as simulacoes executadas ordenadas da mais recente para a mais antiga.",
+            responses = @ApiResponse(responseCode = "200",
+                    content = @Content(schema = @Schema(implementation = SimulacaoHistoricoDTO.class)))
     )
     public ResponseEntity<List<SimulacaoHistoricoDTO>> listar() {
         return ResponseEntity.ok(simulacaoService.listarHistorico());
@@ -58,16 +69,23 @@ public class SimulacaoController {
 
     @GetMapping("/simulacoes/por-produto-dia")
     @Operation(
-            summary = "Metricas por produto",
-            description = "Mostra quantas simulacoes cada produto recebeu em um dia especifico (formato AAAA-MM-DD)."
+            summary = "Metricas por produto e dia",
+            description = """
+                    Consolida as simulacoes por produto em cada dia do periodo informado.
+                    Se nao forem enviados parametros, retorna automaticamente os ultimos 30 dias.
+                    """,
+            responses = @ApiResponse(responseCode = "200",
+                    content = @Content(schema = @Schema(implementation = SimulacoesPorProdutoDiaDTO.class)))
     )
     public ResponseEntity<List<SimulacoesPorProdutoDiaDTO>> porProdutoDia(
             @RequestParam(required = false)
-            @Parameter(description = "Data inicial no formato AAAA-MM-DD.")
+            @Parameter(description = "Data inicial (AAAA-MM-DD). Se ausente, usa 30 dias antes da data final.",
+                    example = "2025-10-01")
             @DateTimeFormat(iso = DateTimeFormat.ISO.DATE)
             LocalDate inicio,
             @RequestParam(required = false)
-            @Parameter(description = "Data final no formato AAAA-MM-DD.")
+            @Parameter(description = "Data final (AAAA-MM-DD). Se ausente, usa a data atual.",
+                    example = "2025-10-30")
             @DateTimeFormat(iso = DateTimeFormat.ISO.DATE)
             LocalDate fim) {
 
