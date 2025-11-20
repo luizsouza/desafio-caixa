@@ -23,8 +23,8 @@ public class PerfilRiscoService {
 
         if (simulacoes.isEmpty()) {
             throw new SemDadosPerfilException(
-                    "Nao encontramos simulacoes para o cliente " + clienteId
-                            + ". Realize ao menos uma simulacao para obter o perfil de risco.");
+                    "Não encontramos simulações para o cliente " + clienteId
+                            + ". Realize ao menos uma simulação para obter o perfil de risco.");
         }
 
         int pontVolume = calcularPontuacaoVolume(simulacoes);
@@ -98,8 +98,8 @@ public class PerfilRiscoService {
 
     private String descricaoPerfil(PerfilRisco perfil) {
         return switch (perfil) {
-            case CONSERVADOR -> "Conservador: baixa movimentacao e foco em liquidez.";
-            case MODERADO -> "Moderado: equilibrio entre liquidez e rentabilidade.";
+            case CONSERVADOR -> "Conservador: baixa movimentação e foco em liquidez.";
+            case MODERADO -> "Moderado: equilíbrio entre liquidez e rentabilidade.";
             case AGRESSIVO -> "Agressivo: busca por maior rentabilidade assumindo mais risco.";
         };
     }

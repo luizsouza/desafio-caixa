@@ -1,5 +1,6 @@
 package br.gov.caixa.painelinvestimentos.model.dto;
 
+import io.swagger.v3.oas.annotations.media.Schema;
 import jakarta.validation.constraints.Min;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
@@ -8,18 +9,22 @@ import jakarta.validation.constraints.Positive;
 public class SimularInvestimentoRequestDTO {
 
     @NotNull
-    @Positive(message = "O campo clienteId deve ser um numero positivo.")
+    @Positive(message = "O campo clienteId deve ser um número positivo.")
+    @Schema(example = "1")
     private Long clienteId;
 
     @NotNull
     @Positive
+    @Schema(example = "10000.00")
     private Double valor;
 
     @NotNull
     @Min(1)
+    @Schema(example = "12")
     private Integer prazoMeses;
 
     @NotBlank
+    @Schema(example = "CDB")
     private String tipoProduto;
 
     public Long getClienteId() { return clienteId; }

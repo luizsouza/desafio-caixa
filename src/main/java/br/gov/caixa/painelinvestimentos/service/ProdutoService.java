@@ -1,7 +1,7 @@
 package br.gov.caixa.painelinvestimentos.service;
 
 import br.gov.caixa.painelinvestimentos.model.dto.ProdutoDTO;
-import br.gov.caixa.painelinvestimentos.model.entity.ProdutoEntity;
+import br.gov.caixa.painelinvestimentos.model.mapper.DtoMapper;
 import br.gov.caixa.painelinvestimentos.repository.ProdutoRepository;
 import org.springframework.stereotype.Service;
 
@@ -22,21 +22,8 @@ public class ProdutoService {
      */
     public List<ProdutoDTO> listarTodos() {
         return produtoRepository.findAll().stream()
-                .map(this::toDTO)
+                .map(DtoMapper::toProdutoDTO)
                 .collect(Collectors.toList());
-    }
-
-    /**
-     * Conversao de Entity para DTO
-     */
-    private ProdutoDTO toDTO(ProdutoEntity entity) {
-        ProdutoDTO dto = new ProdutoDTO();
-        dto.setId(entity.getId());
-        dto.setNome(entity.getNome());
-        dto.setTipo(entity.getTipo());
-        dto.setRentabilidade(entity.getRentabilidade());
-        dto.setRisco(entity.getRisco());
-        return dto;
     }
 }
 

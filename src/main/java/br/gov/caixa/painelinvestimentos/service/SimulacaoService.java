@@ -11,6 +11,8 @@ import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.math.BigDecimal;
+import java.math.RoundingMode;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.LocalTime;
@@ -42,14 +44,17 @@ public class SimulacaoService {
         ProdutoEntity produto = produtoRepository.findByTipoIgnoreCase(tipoProduto)
                 .orElseThrow(() -> new IllegalArgumentException("Tipo de produto não encontrado: " + tipoProduto));
 
-        double valorFinal = calcularValorFinal(request.getValor(), produto.getRentabilidade(), request.getPrazoMeses());
-        double rentabilidadeEfetiva = calcularRentabilidadeEfetiva(produto.getRentabilidade(), request.getPrazoMeses());
+        double valorInvestido = arredondarDuasCasas(request.getValor());
+        double valorFinal = arredondarDuasCasas(
+                calcularValorFinal(request.getValor(), produto.getRentabilidade(), request.getPrazoMeses()));
+        double rentabilidadeEfetiva = arredondarDuasCasas(
+                calcularRentabilidadeEfetiva(produto.getRentabilidade(), request.getPrazoMeses()));
         LocalDateTime agora = LocalDateTime.now();
 
         SimulacaoEntity simulacao = new SimulacaoEntity();
         simulacao.setClienteId(request.getClienteId());
         simulacao.setProduto(produto);
-        simulacao.setValorInvestido(request.getValor());
+        simulacao.setValorInvestido(valorInvestido);
         simulacao.setValorFinal(valorFinal);
         simulacao.setPrazoMeses(request.getPrazoMeses());
         simulacao.setDataSimulacao(agora);
@@ -83,7 +88,7 @@ public class SimulacaoService {
         LocalDate inicioConsulta = inicio != null ? inicio : fimConsulta.minusDays(30);
 
         if (inicioConsulta.isAfter(fimConsulta)) {
-            throw new IllegalArgumentException("Data inicial nao pode ser posterior a data final.");
+            throw new IllegalArgumentException("Data inicial não pode ser posterior à data final.");
         }
 
         LocalDateTime inicioTimestamp = inicioConsulta.atStartOfDay();
@@ -106,12 +111,12 @@ public class SimulacaoService {
                 dto.setProduto(produto.getNome());
                 dto.setData(entryDia.getKey().toString());
                 dto.setQuantidadeSimulacoes(lista.size());
-                dto.setMediaValorFinal(
+                dto.setMediaValorFinal(arredondarDuasCasas(
                         lista.stream()
                                 .mapToDouble(SimulacaoEntity::getValorFinal)
                                 .average()
                                 .orElse(0.0)
-                );
+                ));
                 resposta.add(dto);
             }
         }
@@ -123,13 +128,19 @@ public class SimulacaoService {
         return resposta;
     }
 
+    private double arredondarDuasCasas(double valor) {
+        return BigDecimal.valueOf(valor)
+                .setScale(2, RoundingMode.HALF_UP)
+                .doubleValue();
+    }
+
     private SimulacaoHistoricoDTO toHistoricoDTO(SimulacaoEntity simulacao) {
         SimulacaoHistoricoDTO dto = new SimulacaoHistoricoDTO();
         dto.setId(simulacao.getId());
         dto.setClienteId(simulacao.getClienteId());
         dto.setProduto(simulacao.getProduto().getNome());
-        dto.setValorInvestido(simulacao.getValorInvestido());
-        dto.setValorFinal(simulacao.getValorFinal());
+        dto.setValorInvestido(arredondarDuasCasas(simulacao.getValorInvestido()));
+        dto.setValorFinal(arredondarDuasCasas(simulacao.getValorFinal()));
         dto.setPrazoMeses(simulacao.getPrazoMeses());
         dto.setDataSimulacao(simulacao.getDataSimulacao());
         return dto;

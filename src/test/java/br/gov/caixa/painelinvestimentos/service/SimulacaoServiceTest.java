@@ -1,9 +1,9 @@
 package br.gov.caixa.painelinvestimentos.service;
 
-import br.gov.caixa.painelinvestimentos.model.dto.SimularInvestimentoRequestDTO;
-import br.gov.caixa.painelinvestimentos.model.dto.SimularInvestimentoResponseDTO;
 import br.gov.caixa.painelinvestimentos.model.dto.SimulacaoHistoricoDTO;
 import br.gov.caixa.painelinvestimentos.model.dto.SimulacoesPorProdutoDiaDTO;
+import br.gov.caixa.painelinvestimentos.model.dto.SimularInvestimentoRequestDTO;
+import br.gov.caixa.painelinvestimentos.model.dto.SimularInvestimentoResponseDTO;
 import br.gov.caixa.painelinvestimentos.model.entity.ProdutoEntity;
 import br.gov.caixa.painelinvestimentos.model.entity.SimulacaoEntity;
 import br.gov.caixa.painelinvestimentos.repository.InvestimentoRepository;
@@ -107,7 +107,7 @@ class SimulacaoServiceTest {
     }
 
     @Test
-    @DisplayName("Deve agrupar simulacoes por produto e dia usando valor final")
+    @DisplayName("Deve agrupar simulações por produto e dia usando valor final")
     void shouldGroupSimulationsByDay() {
         ProdutoEntity produto = produto();
         SimulacaoEntity a = new SimulacaoEntity();
@@ -138,7 +138,7 @@ class SimulacaoServiceTest {
     }
 
     @Test
-    @DisplayName("Deve aplicar o periodo padrao de 30 dias quando inicio e nulos")
+    @DisplayName("Deve aplicar o período padrão de 30 dias quando início e fim são nulos")
     void shouldApplyDefaultPeriodWhenNullDates() {
         when(simulacaoRepository.findByDataSimulacaoBetween(any(), any())).thenReturn(List.of());
 
@@ -153,7 +153,7 @@ class SimulacaoServiceTest {
     }
 
     @Test
-    @DisplayName("Deve rejeitar periodo com data inicial depois da final")
+    @DisplayName("Deve rejeitar período com data inicial depois da final")
     void shouldRejectInvalidDateRange() {
         assertThatThrownBy(() -> simulacaoService.buscarSimulacoesPorProdutoPorDia(
                 LocalDate.of(2025, 2, 1), LocalDate.of(2025, 1, 31)))
@@ -162,7 +162,7 @@ class SimulacaoServiceTest {
     }
 
     @Test
-    @DisplayName("Nao deve chamar repositorio se houver parametro invalido")
+    @DisplayName("Não deve chamar repositório se houver parâmetro inválido")
     void shouldNotCallRepositoryOnInvalidRange() {
         assertThatThrownBy(() -> simulacaoService.buscarSimulacoesPorProdutoPorDia(
                 LocalDate.parse("2025-02-01"), LocalDate.parse("2025-01-01"))).isInstanceOf(IllegalArgumentException.class);

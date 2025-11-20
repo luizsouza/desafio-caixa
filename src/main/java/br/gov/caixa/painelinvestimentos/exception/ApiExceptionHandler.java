@@ -21,13 +21,13 @@ import java.util.Objects;
 public class ApiExceptionHandler {
 
     private static final String MSG_UNREADABLE_BODY =
-            "Corpo da requisicao invalido. Verifique se o JSON esta bem formado e se os campos numericos contem apenas numeros.";
+            "Corpo da requisição inválido. Verifique se o JSON está bem formado e se os campos numéricos contêm apenas números.";
     private static final String MSG_INVALID_FIELD_TEMPLATE =
-            "O campo '%s' recebeu um valor invalido (%s). Ajuste o formato e tente novamente.";
+            "O campo '%s' recebeu um valor inválido (%s). Ajuste o formato e tente novamente.";
     private static final String MSG_INVALID_PARAMETER_TEMPLATE =
-            "O parametro '%s' recebeu o valor '%s' em um formato invalido. Use o padrao indicado na documentacao (ex.: AAAA-MM-DD).";
-    private static final String DEFAULT_PARAMETER_NAME = "parametro";
-    private static final String VALIDATION_MESSAGE = "Erro de validacao nos campos enviados";
+            "O parâmetro '%s' recebeu o valor '%s' em um formato inválido. Use o padrão indicado na documentação (ex.: AAAA-MM-DD).";
+    private static final String DEFAULT_PARAMETER_NAME = "parâmetro";
+    private static final String VALIDATION_MESSAGE = "Erro de validação nos campos enviados";
 
     @ExceptionHandler(HttpMessageNotReadableException.class)
     public ResponseEntity<ApiError> handleUnreadableBody(
