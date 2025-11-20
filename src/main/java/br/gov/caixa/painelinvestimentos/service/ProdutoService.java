@@ -18,7 +18,7 @@ public class ProdutoService {
     }
 
     /**
-     * Lista todos os produtos disponiveis
+     * Lista todos os produtos disponíveis
      */
     public List<ProdutoDTO> listarTodos() {
         return produtoRepository.findAll().stream()

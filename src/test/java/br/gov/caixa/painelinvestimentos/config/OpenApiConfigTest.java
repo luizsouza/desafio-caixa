@@ -33,7 +33,7 @@ class OpenApiConfigTest {
     }
 
     @Test
-    @DisplayName("Customizer deve preencher exemplos de datas em parametros fim/data")
+    @DisplayName("Customizer deve preencher exemplos de datas em parâmetros fim/data")
     void shouldFillDateExamples() {
         OpenAPI api = new OpenAPI();
         Parameter fim = new Parameter().name("fim");

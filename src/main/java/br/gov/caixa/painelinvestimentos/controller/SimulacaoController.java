@@ -27,8 +27,8 @@ import java.util.List;
 
 @RestController
 @Tag(
-        name = "Simulacoes",
-        description = "Executa novas simulacoes, lista historicos e expone metricas diarias por produto."
+        name = "Simulações",
+        description = "Executa novas simulações, lista históricos e expõe métricas diárias por produto."
 )
 @SecurityRequirement(name = OpenApiConfig.BEARER_AUTH_SCHEME)
 public class SimulacaoController {
@@ -41,8 +41,8 @@ public class SimulacaoController {
 
     @PostMapping("/simular-investimento")
     @Operation(
-            summary = "Nova simulacao",
-            description = "Processa os dados do cliente e retorna o produto validado e o resultado da simulacao.",
+            summary = "Nova simulação",
+            description = "Processa os dados do cliente e retorna o produto validado e o resultado da simulação.",
             responses = {
                     @ApiResponse(responseCode = "200", description = "Simulacao realizada",
                             content = @Content(schema = @Schema(implementation = SimularInvestimentoResponseDTO.class))),
@@ -58,8 +58,8 @@ public class SimulacaoController {
 
     @GetMapping("/simulacoes")
     @Operation(
-            summary = "Historico de simulacoes",
-            description = "Retorna todas as simulacoes executadas ordenadas da mais recente para a mais antiga.",
+            summary = "Histórico de simulações",
+            description = "Retorna todas as simulações executadas ordenadas da mais recente para a mais antiga.",
             responses = @ApiResponse(responseCode = "200",
                     content = @Content(schema = @Schema(implementation = SimulacaoHistoricoDTO.class)))
     )
@@ -69,10 +69,10 @@ public class SimulacaoController {
 
     @GetMapping("/simulacoes/por-produto-dia")
     @Operation(
-            summary = "Metricas por produto e dia",
+            summary = "Métricas por produto e dia",
             description = """
-                    Consolida as simulacoes por produto em cada dia do periodo informado.
-                    Se nao forem enviados parametros, retorna automaticamente os ultimos 30 dias.
+                    Consolida as simulações por produto em cada dia do periodo informado.
+                    Se nao forem enviados parâmetros, retorna automaticamente os últimos 30 dias.
                     """,
             responses = @ApiResponse(responseCode = "200",
                     content = @Content(schema = @Schema(implementation = SimulacoesPorProdutoDiaDTO.class)))
@@ -85,7 +85,7 @@ public class SimulacaoController {
             LocalDate inicio,
             @RequestParam(required = false)
             @Parameter(description = "Data final (AAAA-MM-DD). Se ausente, usa a data atual.",
-                    example = "2025-10-30")
+                    example = "2025-12-31")
             @DateTimeFormat(iso = DateTimeFormat.ISO.DATE)
             LocalDate fim) {
 

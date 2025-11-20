@@ -128,25 +128,29 @@ O Banco SQLite (`data/investimentos.db`) está versionado e é montado como volu
 
 ---
 
-## 7. Testes e evidências
+## 7. Testes e evidencias
 
-- `mvn clean test` executa unitários e integrações.
-- Relatório JaCoCo em `target/site/jacoco/index.html`.
-- Resumo da suíte:
+- `mvn clean test` executa unitarios e integracoes.
+- Relatorio JaCoCo em `target/site/jacoco/index.html`.
+- Resumo da suite:
 
-| Classe | Tipo | Cenários cobertos |
+| Classe | Tipo | Cenarios cobertos |
 |--------|------|-------------------|
-| `SimulacaoServiceTest` | Unitário | Cálculo do valor final, persistência e exceções para produto desconhecido |
-| `SimulacaoControllerIT` | Integração | POST `/simular-investimento` e GET `/simulacoes/por-produto-dia` com segurança configurada |
-| `PerfilRiscoServiceTest` | Unitário | Pontuação por volume/frequência/liquidez e definição de perfil |
-| `RecomendacaoServiceTest` | Unitário | Filtro/ordenação do motor de recomendação |
-| `TelemetriaServiceTest` | Unitário | Agrupamento de tempos e quantidade por endpoint |
-| `JwtServiceTest` / `AuthControllerIT` | Unit./Integração | Geração/validação de token e fluxo de login |
-| `InvestimentoServiceTest` | Unitário | Conversão do histórico para DTO |
+| `SimulacaoServiceTest` | Unitario | Calculo do valor final, persistencia e excecoes para produto desconhecido |
+| `SimulacaoControllerIT` | Integracao | POST `/simular-investimento` e GET `/simulacoes/por-produto-dia` com seguranca configurada |
+| `PerfilRiscoServiceTest` | Unitario | Perfis conservador/moderado/agressivo via pontuacao de volume/frequencia/liquidez |
+| `RecomendacaoServiceTest` | Unitario | Filtro/ordenacao/pontuacao por perfil (conservador, moderado, agressivo) |
+| `TelemetriaServiceTest` | Unitario | Agrupamento de tempos e quantidade por endpoint |
+| `TelemetriaInterceptorTest` | Unitario | Monitoramento apenas de endpoints configurados e registro de duracao |
+| `TelemetriaEntityTest` | Unitario | Construtor e getters/setters da entidade de telemetria |
+| `OpenApiConfigTest` | Unitario | Customizers de Swagger (exemplos de data e ordenacao do /auth/login) |
+| `ApiExceptionHandlerTest` / `ApiExceptionHandlerExtraTest` | Unitario | Mensagens e status para validacao, corpo ilegivel e parametros invalidos |
+| `JwtServiceTest` / `JwtAuthenticationFilterTest` / `AuthControllerIT` | Unit./Integracao | Geracao/validacao de token, filtros JWT e fluxo de login |
+| `InvestimentoServiceTest` | Unitario | Conversao do historico para DTO |
+| `ProdutoRepositoryDataTest` | Integracao (@DataJpaTest) | Carrega seeds reais (SQLite) e valida busca por tipo |
 
-Os testes garantem comportamento real (payloads, regras, segurança).  
-Evidências adicionais: Swagger documenta contratos; Dockerfile/docker-compose permitem reproducibilidade.
-
+Os testes garantem comportamento real (payloads, regras, seguranca e integracao com SQLite).
+Evidencias adicionais: Swagger documenta contratos; Dockerfile/docker-compose permitem reproducibilidade.
 ---
 
 ## 9. Validação

@@ -55,7 +55,7 @@ class PerfilRiscoServiceTest {
     }
 
     @Test
-    @DisplayName("Volumes medios, frequencia moderada e prazos intermediarios levam ao perfil moderado")
+    @DisplayName("Volumes medios, frequência moderada e prazos intermediários levam ao perfil moderado")
     void shouldReturnModerateProfile() {
         when(simulacaoRepository.findByClienteId(3L))
                 .thenReturn(gerarSimulacoes(4, 10000, 12));
@@ -67,7 +67,7 @@ class PerfilRiscoServiceTest {
     }
 
     @Test
-    @DisplayName("Volumes baixos, poucas simulacoes e prazos curtos levam ao perfil conservador")
+    @DisplayName("Volumes baixos, poucas simulações e prazos curtos levam ao perfil conservador")
     void shouldReturnConservativeProfile() {
         when(simulacaoRepository.findByClienteId(4L))
                 .thenReturn(gerarSimulacoes(1, 5000, 3));

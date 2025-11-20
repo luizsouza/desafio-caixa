@@ -17,7 +17,7 @@ class ApiExceptionHandlerExtraTest {
     private final ApiExceptionHandler handler = new ApiExceptionHandler();
 
     @Test
-    @DisplayName("Corpo com formato invalido deve apontar o campo com problema")
+    @DisplayName("Corpo com formato inválido deve apontar o campo com problema")
     void shouldHandleUnreadableBodyWithField() {
         HttpServletRequest request = new MockHttpServletRequest("POST", "/simular-investimento");
         InvalidFormatException cause = InvalidFormatException.from(null, "bad number", "abc", String.class);

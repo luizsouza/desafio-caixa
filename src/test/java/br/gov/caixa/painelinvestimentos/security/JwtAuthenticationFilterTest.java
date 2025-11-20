@@ -31,7 +31,7 @@ class JwtAuthenticationFilterTest {
     }
 
     @Test
-    @DisplayName("Sem header Authorization deve pular autenticao")
+    @DisplayName("Sem header Authorization deve pular autenticação")
     void shouldSkipWhenNoHeader() throws Exception {
         MockHttpServletRequest request = new MockHttpServletRequest("GET", "/simulacoes");
         MockHttpServletResponse response = new MockHttpServletResponse();
@@ -44,7 +44,7 @@ class JwtAuthenticationFilterTest {
     }
 
     @Test
-    @DisplayName("Token invalido deve seguir sem autenticar")
+    @DisplayName("Token inválido deve seguir sem autenticar")
     void shouldSkipWhenTokenInvalid() throws Exception {
         MockHttpServletRequest request = new MockHttpServletRequest("GET", "/simulacoes");
         request.addHeader("Authorization", "Bearer invalido");
@@ -72,7 +72,7 @@ class JwtAuthenticationFilterTest {
     }
 
     @Test
-    @DisplayName("Username nulo nao deve autenticar")
+    @DisplayName("Username nulo não deve autenticar")
     void shouldNotAuthenticateWhenUsernameNull() throws Exception {
         MockHttpServletRequest request = new MockHttpServletRequest("GET", "/simulacoes");
         request.addHeader("Authorization", "Bearer token");
@@ -88,7 +88,7 @@ class JwtAuthenticationFilterTest {
     }
 
     @Test
-    @DisplayName("Nao deve reautenticar se contexto ja estiver preenchido")
+    @DisplayName("Não deve reautenticar se contexto já estiver preenchido")
     void shouldNotReauthenticateWhenContextAlreadySet() throws Exception {
         MockHttpServletRequest request = new MockHttpServletRequest("GET", "/simulacoes");
         request.addHeader("Authorization", "Bearer token");
@@ -105,12 +105,12 @@ class JwtAuthenticationFilterTest {
         filter.doFilterInternal(request, response, chain);
 
         verify(chain).doFilter(request, response);
-        // userDetailsService nao deve ser chamado novamente porque o contexto ja estava autenticado
+        // userDetailsService não deve ser chamado novamente porque o contexto já estava autenticado
         verifyNoInteractions(userDetailsService);
     }
 
     @Test
-    @DisplayName("Token valido deve popular o SecurityContext")
+    @DisplayName("Token válido deve popular o SecurityContext")
     void shouldAuthenticateWhenTokenValid() throws Exception {
         MockHttpServletRequest request = new MockHttpServletRequest("GET", "/simulacoes");
         request.addHeader("Authorization", "Bearer token");

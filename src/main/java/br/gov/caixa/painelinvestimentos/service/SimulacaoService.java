@@ -148,7 +148,7 @@ public class SimulacaoService {
     }
 
     /**
-     * Fórmula baseada no enunciado: rentabilidade anual simples.
+     * Fórmula baseada em rentabilidade anual simples.
      */
     private double calcularValorFinal(double valorInvestido, double rentabilidadeAnual, int prazoMeses) {
         double prazoAnos = prazoMeses / 12d;

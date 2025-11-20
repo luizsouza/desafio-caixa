@@ -41,7 +41,7 @@ class SimulacaoControllerIT {
     private SimulacaoService simulacaoService;
 
     @Test
-    @DisplayName("POST /simular-investimento deve validar payload e retornar dados da simulacao")
+    @DisplayName("POST /simular-investimento deve validar payload e retornar dados da simulação")
     void shouldSimulateInvestmentViaController() throws Exception {
         SimularInvestimentoResponseDTO response = new SimularInvestimentoResponseDTO();
         ProdutoValidadoDTO produto = new ProdutoValidadoDTO();
@@ -73,7 +73,7 @@ class SimulacaoControllerIT {
     }
 
     @Test
-    @DisplayName("Payloads invalidos devem retornar erro de validacao padronizado")
+    @DisplayName("Payloads inválidos devem retornar erro de validação padronizado")
     void shouldValidateInvalidPayload() throws Exception {
         mockMvc.perform(post("/simular-investimento")
                         .header("Authorization", "Bearer " + jwtService.generateToken("admin"))
@@ -84,7 +84,7 @@ class SimulacaoControllerIT {
     }
 
     @Test
-    @DisplayName("GET /simulacoes/por-produto-dia deve encaminhar periodo para o servico")
+    @DisplayName("GET /simulacoes/por-produto-dia deve encaminhar período para o serviço")
     void shouldForwardDateParameter() throws Exception {
         SimulacoesPorProdutoDiaDTO dto = new SimulacoesPorProdutoDiaDTO();
         dto.setProduto("CDB");
@@ -111,7 +111,7 @@ class SimulacaoControllerIT {
     }
 
     @Test
-    @DisplayName("GET /simulacoes/por-produto-dia sem parametros deve repassar nulos (usa periodo padrao no servico)")
+    @DisplayName("GET /simulacoes/por-produto-dia sem parâmetros deve repassar nulos (usa período padrão no serviço)")
     void shouldForwardNullDatesWhenParamsOmitted() throws Exception {
         when(simulacaoService.buscarSimulacoesPorProdutoPorDia(any(), any()))
                 .thenReturn(List.of());
@@ -137,7 +137,7 @@ class SimulacaoControllerIT {
     }
 
     @Test
-    @DisplayName("Deve negar acesso com token invalido")
+    @DisplayName("Deve negar acesso com token inválido")
     void shouldRejectRequestsWithInvalidToken() throws Exception {
         mockMvc.perform(get("/simulacoes")
                         .header("Authorization", "Bearer token-invalido"))
