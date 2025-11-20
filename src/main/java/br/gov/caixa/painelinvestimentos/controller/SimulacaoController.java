@@ -30,6 +30,7 @@ import java.util.List;
         name = "Simulações",
         description = "Executa novas simulações, lista históricos e expõe métricas diárias por produto."
 )
+// Exige que todas as chamadas para este controller incluam um token JWT válido.
 @SecurityRequirement(name = OpenApiConfig.BEARER_AUTH_SCHEME)
 public class SimulacaoController {
 
@@ -81,11 +82,13 @@ public class SimulacaoController {
             @RequestParam(required = false)
             @Parameter(description = "Data inicial (AAAA-MM-DD). Se ausente, usa 30 dias antes da data final.",
                     example = "2025-10-01")
+            // A anotação @DateTimeFormat garante que o Spring consiga converter a string do request para um objeto LocalDate.
             @DateTimeFormat(iso = DateTimeFormat.ISO.DATE)
             LocalDate inicio,
             @RequestParam(required = false)
             @Parameter(description = "Data final (AAAA-MM-DD). Se ausente, usa a data atual.",
                     example = "2025-12-31")
+            // O padrão ISO.DATE (AAAA-MM-DD) usado para evitar problemas com formatos de data locais.
             @DateTimeFormat(iso = DateTimeFormat.ISO.DATE)
             LocalDate fim) {
 

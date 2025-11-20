@@ -115,6 +115,7 @@
                 <artifactId>jacoco-maven-plugin</artifactId>
                 <version>0.8.11</version>
                 <executions>
+                    <!-- Prepara o agente do JaCoCo para instrumentar o código durante a fase de teste -->
                     <execution>
                         <goals>
                             <goal>prepare-agent</goal>
@@ -127,6 +128,7 @@
                             <goal>report</goal>
                         </goals>
                     </execution>
+                    <!-- Regra de verificação: o build falhará se a cobertura de linha for menor que 80% -->
                     <execution>
                         <id>check</id>
                         <goals>
@@ -159,6 +161,7 @@
                     <effort>Max</effort>
                     <threshold>Low</threshold>
                     <failOnError>true</failOnError>
+                    <!-- Configurado para falhar o build se encontrar qualquer bug, garantindo a qualidade do código. -->
                 </configuration>
                 <executions>
                     <execution>
