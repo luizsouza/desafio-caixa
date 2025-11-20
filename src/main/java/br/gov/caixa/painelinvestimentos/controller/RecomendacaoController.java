@@ -20,8 +20,8 @@ import java.util.List;
 
 @RestController
 @Tag(
-        name = "Recomendacoes",
-        description = "Sugestoes de produtos alinhadas ao perfil calculado."
+        name = "Recomendações",
+        description = "Sugestões de produtos alinhadas ao perfil calculado."
 )
 @SecurityRequirement(name = OpenApiConfig.BEARER_AUTH_SCHEME)
 public class RecomendacaoController {

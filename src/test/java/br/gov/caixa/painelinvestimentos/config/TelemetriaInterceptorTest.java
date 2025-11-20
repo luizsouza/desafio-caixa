@@ -20,7 +20,7 @@ class TelemetriaInterceptorTest {
     private final TelemetriaInterceptor interceptor = new TelemetriaInterceptor(telemetriaService);
 
     @Test
-    @DisplayName("preHandle deve ignorar endpoints nao monitorados")
+    @DisplayName("preHandle deve ignorar endpoints não monitorados")
     void shouldIgnoreUnmonitoredEndpoints() {
         HttpServletRequest request = new MockHttpServletRequest("GET", "/nao-monitorado");
         HttpServletResponse response = new MockHttpServletResponse();

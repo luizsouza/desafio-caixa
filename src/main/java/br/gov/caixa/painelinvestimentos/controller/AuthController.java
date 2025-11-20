@@ -18,8 +18,8 @@ import org.springframework.web.bind.annotation.RestController;
 @RestController
 @RequestMapping("/auth")
 @Tag(
-        name = "Autenticacao",
-        description = "Fluxo de login responsavel por emitir tokens JWT para os demais servicos."
+        name = "Autenticação",
+        description = "Fluxo de login responsável por emitir tokens JWT para os demais serviços."
 )
 public class AuthController {
 
@@ -31,10 +31,10 @@ public class AuthController {
 
     @PostMapping("/login")
     @Operation(
-            summary = "Autentica o usuario",
+            summary = "Autentica o usuário",
             description = """
                     Valida as credenciais enviadas e retorna um token JWT do tipo Bearer.
-                    Credenciais para avaliacao:
+                    Credenciais para avaliação:
                     {
                       "username": "admin",
                       "password": "senha123"
@@ -48,7 +48,7 @@ public class AuthController {
     )
     public ResponseEntity<AuthResponseDTO> login(
             @io.swagger.v3.oas.annotations.parameters.RequestBody(
-                    description = "Informe o usuario e senha indicados acima antes do \"Try it out\".",
+                    description = "Informe o usuário e senha indicados acima antes do \"Try it out\".",
                     required = true,
                     content = @Content(schema = @Schema(implementation = AuthRequestDTO.class)))
             @Valid @RequestBody AuthRequestDTO request) {

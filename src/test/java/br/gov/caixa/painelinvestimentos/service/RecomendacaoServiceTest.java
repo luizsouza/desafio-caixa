@@ -58,7 +58,7 @@ class RecomendacaoServiceTest {
         assertThat(recomendados).hasSize(2);
         assertThat(recomendados)
                 .extracting(ProdutoRecomendadoDTO::getNome)
-                .containsExactly("Fundo Moderado", "CDB Conservador"); // ordenado por pontuacao 1.2 > 0.8
+                .containsExactly("Fundo Moderado", "CDB Conservador"); // ordenado por pontuação 1.2 > 0.8
         assertThat(recomendados.get(0).getPontuacao()).isEqualTo(1.2);
         assertThat(recomendados.get(1).getPontuacao()).isEqualTo(0.8);
     }

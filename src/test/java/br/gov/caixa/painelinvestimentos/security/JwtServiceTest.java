@@ -40,7 +40,7 @@ class JwtServiceTest {
     }
 
     @Test
-    @DisplayName("Token com usuario diferente deve ser considerado invalido")
+    @DisplayName("Token com usuário diferente deve ser considerado inválido")
     void shouldBeInvalidWhenUsernameDoesNotMatch() {
         JwtService service = new JwtService(SECRET, 60);
         UserDetails tokenOwner = User.withUsername("admin").password("x").roles("USER").build();

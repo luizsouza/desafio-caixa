@@ -43,7 +43,7 @@ class SimulacaoServiceTest {
     private SimulacaoService simulacaoService;
 
     @Test
-    @DisplayName("Deve realizar uma simulacao valida, persistir o resultado e registrar o historico do cliente")
+    @DisplayName("Deve realizar uma simulação válida, persistir o resultado e registrar o histórico do cliente")
     void shouldSimulateInvestment() {
         ProdutoEntity produto = produto();
         when(produtoRepository.findByTipoIgnoreCase("CDB"))
@@ -69,7 +69,7 @@ class SimulacaoServiceTest {
     }
 
     @Test
-    @DisplayName("Deve informar quando o tipo de produto nao existe")
+    @DisplayName("Deve informar quando o tipo de produto não existe")
     void shouldRejectUnknownProductType() {
         when(produtoRepository.findByTipoIgnoreCase("desconhecido"))
                 .thenReturn(Optional.empty());
@@ -86,7 +86,7 @@ class SimulacaoServiceTest {
     }
 
     @Test
-    @DisplayName("Listar historico deve manter dados essenciais")
+    @DisplayName("Listar histórico deve manter dados essenciais")
     void shouldListHistory() {
         ProdutoEntity produto = produto();
         SimulacaoEntity entity = new SimulacaoEntity();

@@ -36,10 +36,10 @@ public class TelemetriaController {
 
     @GetMapping
     @Operation(
-            summary = "Metricas de uso",
+            summary = "Métricas de uso",
             description = """
-                    Informa quantas chamadas cada servico recebeu e o tempo medio de resposta.
-                    Inicio/fim sao opcionais (formato AAAA-MM-DD); se nao forem informados, retorna os ultimos 30 dias.
+                    Informa quantas chamadas cada serviço recebeu e o tempo médio de resposta.
+                    Início/fim sao opcionais (formato AAAA-MM-DD); se não forem informados, retorna os últimos 30 dias.
                     """,
             responses = @ApiResponse(responseCode = "200",
                     content = @Content(schema = @Schema(implementation = TelemetriaResponseDTO.class)))
@@ -51,7 +51,7 @@ public class TelemetriaController {
             LocalDate inicio,
 
             @RequestParam(required = false)
-            @Parameter(description = "Data final no formato AAAA-MM-DD.", example = "2025-10-31")
+            @Parameter(description = "Data final no formato AAAA-MM-DD.", example = "2025-12-31")
             @DateTimeFormat(iso = DateTimeFormat.ISO.DATE)
             LocalDate fim
     ) {
