@@ -14,6 +14,7 @@ import java.util.List;
  */
 public final class DtoMapper {
 
+    // Construtor privado para impedir que esta classe utilitária seja instanciada.
     private DtoMapper() {}
 
     public static ProdutoDTO toProdutoDTO(ProdutoEntity entity) {
@@ -57,6 +58,7 @@ public final class DtoMapper {
         dto.setQuantidadeChamadas((long) registros.size());
         dto.setMediaTempoRespostaMs(
                 Math.round(
+                        // Usamos um stream para calcular a média de forma funcional e concisa.
                         registros.stream()
                                 .mapToLong(TelemetriaEntity::getTempoRespostaMs)
                                 .average()

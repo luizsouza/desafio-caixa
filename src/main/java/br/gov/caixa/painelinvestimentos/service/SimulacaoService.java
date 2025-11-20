@@ -38,6 +38,8 @@ public class SimulacaoService {
         this.investimentoRepository = investimentoRepository;
     }
 
+    // Todas as operações de banco de dados (salvar simulação e histórico)
+    // ocorrem de forma atômica. Ou tudo funciona, ou nada é salvo.
     @Transactional
     public SimularInvestimentoResponseDTO simularInvestimento(SimularInvestimentoRequestDTO request) {
         String tipoProduto = request.getTipoProduto().trim();
@@ -78,16 +80,18 @@ public class SimulacaoService {
     public List<SimulacaoHistoricoDTO> listarHistorico() {
         return simulacaoRepository.findAll(Sort.by(Sort.Direction.DESC, "dataSimulacao"))
                 .stream()
-                .map(this::toHistoricoDTO)
+                .map(this::toSimulacaoHistoricoDTO) // Renomeando para clareza
                 .collect(Collectors.toList());
     }
 
     @Transactional(readOnly = true)
     public List<SimulacoesPorProdutoDiaDTO> buscarSimulacoesPorProdutoPorDia(LocalDate inicio, LocalDate fim) {
+        // Lógica de fallback: se o usuário não informar as datas, é assumido um período padrão de 30 dias.
+        // Isso evita a necessidade de validações complexas no controller.
         LocalDate fimConsulta = fim != null ? fim : LocalDate.now();
         LocalDate inicioConsulta = inicio != null ? inicio : fimConsulta.minusDays(30);
 
-        if (inicioConsulta.isAfter(fimConsulta)) {
+        if (inicioConsulta.isAfter(fimConsulta)) { // Validação básica para evitar erros na consulta.
             throw new IllegalArgumentException("Data inicial não pode ser posterior à data final.");
         }
 
@@ -96,27 +100,28 @@ public class SimulacaoService {
 
         List<SimulacaoEntity> simulacoes = simulacaoRepository.findByDataSimulacaoBetween(inicioTimestamp, fimTimestamp);
 
-        Map<ProdutoEntity, Map<LocalDate, List<SimulacaoEntity>>> agrupado = simulacoes.stream()
-                .collect(Collectors.groupingBy(
-                        SimulacaoEntity::getProduto,
-                        Collectors.groupingBy(sim -> sim.getDataSimulacao().toLocalDate())
-                ));
+        Map<ProdutoEntity, Map<LocalDate, List<SimulacaoEntity>>> agrupado = new java.util.HashMap<>();
+        for (SimulacaoEntity sim : simulacoes) {
+            agrupado.computeIfAbsent(sim.getProduto(), k -> new java.util.HashMap<>())
+                   .computeIfAbsent(sim.getDataSimulacao().toLocalDate(), k -> new ArrayList<>())
+                   .add(sim);
+        }
 
         List<SimulacoesPorProdutoDiaDTO> resposta = new ArrayList<>();
         for (Map.Entry<ProdutoEntity, Map<LocalDate, List<SimulacaoEntity>>> entryProduto : agrupado.entrySet()) {
             ProdutoEntity produto = entryProduto.getKey();
             for (Map.Entry<LocalDate, List<SimulacaoEntity>> entryDia : entryProduto.getValue().entrySet()) {
                 List<SimulacaoEntity> lista = entryDia.getValue();
+                double mediaValorFinal = lista.stream()
+                        .mapToDouble(SimulacaoEntity::getValorFinal)
+                        .average()
+                        .orElse(0.0);
+
                 SimulacoesPorProdutoDiaDTO dto = new SimulacoesPorProdutoDiaDTO();
                 dto.setProduto(produto.getNome());
                 dto.setData(entryDia.getKey().toString());
                 dto.setQuantidadeSimulacoes(lista.size());
-                dto.setMediaValorFinal(arredondarDuasCasas(
-                        lista.stream()
-                                .mapToDouble(SimulacaoEntity::getValorFinal)
-                                .average()
-                                .orElse(0.0)
-                ));
+                dto.setMediaValorFinal(arredondarDuasCasas(mediaValorFinal));
                 resposta.add(dto);
             }
         }
@@ -129,12 +134,18 @@ public class SimulacaoService {
     }
 
     private double arredondarDuasCasas(double valor) {
+        // Usar BigDecimal é fundamental para cálculos financeiros para evitar os problemas
+        // de precisão inerentes aos tipos float/double.
         return BigDecimal.valueOf(valor)
                 .setScale(2, RoundingMode.HALF_UP)
                 .doubleValue();
     }
 
-    private SimulacaoHistoricoDTO toHistoricoDTO(SimulacaoEntity simulacao) {
+    /**
+     * Converte a entidade Simulacao para seu DTO de histórico.
+     * Movido do DtoMapper para manter a lógica de mapeamento junto ao serviço que a utiliza.
+     */
+    private SimulacaoHistoricoDTO toSimulacaoHistoricoDTO(SimulacaoEntity simulacao) {
         SimulacaoHistoricoDTO dto = new SimulacaoHistoricoDTO();
         dto.setId(simulacao.getId());
         dto.setClienteId(simulacao.getClienteId());
@@ -160,6 +171,7 @@ public class SimulacaoService {
 
     /**
      * Fórmula baseada em rentabilidade anual simples.
+     * OBS: Não foi definido nos requisitos a rentabilidade ou juros de cada produto/investimento.
      */
     private double calcularValorFinal(double valorInvestido, double rentabilidadeAnual, int prazoMeses) {
         double prazoAnos = prazoMeses / 12d;
