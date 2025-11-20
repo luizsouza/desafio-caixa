@@ -6,6 +6,7 @@ import org.springframework.security.core.userdetails.User;
 import org.springframework.security.core.userdetails.UserDetails;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
@@ -36,5 +37,17 @@ class JwtServiceTest {
 
         assertThrows(io.jsonwebtoken.ExpiredJwtException.class,
                 () -> service.isTokenValid(token, user));
+    }
+
+    @Test
+    @DisplayName("Token com usuario diferente deve ser considerado invalido")
+    void shouldBeInvalidWhenUsernameDoesNotMatch() {
+        JwtService service = new JwtService(SECRET, 60);
+        UserDetails tokenOwner = User.withUsername("admin").password("x").roles("USER").build();
+        UserDetails anotherUser = User.withUsername("outra").password("x").roles("USER").build();
+
+        String token = service.generateToken(tokenOwner.getUsername());
+
+        assertFalse(service.isTokenValid(token, anotherUser));
     }
 }

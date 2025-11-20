@@ -9,13 +9,13 @@ import java.util.List;
 public interface SimulacaoRepository extends JpaRepository<SimulacaoEntity, Long> {
 
     /**
-     * Busca todas as simulacoes realizadas por um cliente especifico.
+     * Busca todas as simulações realizadas por um cliente específico.
      */
     List<SimulacaoEntity> findByClienteId(Long clienteId);
 
     /**
-     * Busca as simulacoes realizadas dentro de um intervalo de data/hora.
-     * Usado para telemetria diaria (00:00 ate 23:59).
+     * Busca as simulações realizadas dentro de um intervalo de data/hora.
+     * Usado para telemetria diária (00:00 ate 23:59).
      */
     List<SimulacaoEntity> findByDataSimulacaoBetween(LocalDateTime inicio, LocalDateTime fim);
 }

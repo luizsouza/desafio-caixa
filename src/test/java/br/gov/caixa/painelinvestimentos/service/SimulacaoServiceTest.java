@@ -27,6 +27,7 @@ import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.verifyNoInteractions;
 import static org.mockito.Mockito.when;
 
 @ExtendWith(MockitoExtension.class)
@@ -134,6 +135,39 @@ class SimulacaoServiceTest {
         assertThat(dtoMaisRecente.getProduto()).isEqualTo("Produto Teste");
         assertThat(dtoMaisRecente.getQuantidadeSimulacoes()).isEqualTo(1);
         assertThat(dtoMaisRecente.getMediaValorFinal()).isEqualTo(4400.0);
+    }
+
+    @Test
+    @DisplayName("Deve aplicar o periodo padrao de 30 dias quando inicio e nulos")
+    void shouldApplyDefaultPeriodWhenNullDates() {
+        when(simulacaoRepository.findByDataSimulacaoBetween(any(), any())).thenReturn(List.of());
+
+        simulacaoService.buscarSimulacoesPorProdutoPorDia(null, LocalDate.of(2025, 1, 31));
+
+        var inicio = ArgumentCaptor.forClass(LocalDateTime.class);
+        var fim = ArgumentCaptor.forClass(LocalDateTime.class);
+        verify(simulacaoRepository).findByDataSimulacaoBetween(inicio.capture(), fim.capture());
+
+        assertThat(inicio.getValue()).isEqualTo(LocalDateTime.of(2025, 1, 1, 0, 0));
+        assertThat(fim.getValue()).isEqualTo(LocalDateTime.of(2025, 1, 31, 23, 59, 59, 999_999_999));
+    }
+
+    @Test
+    @DisplayName("Deve rejeitar periodo com data inicial depois da final")
+    void shouldRejectInvalidDateRange() {
+        assertThatThrownBy(() -> simulacaoService.buscarSimulacoesPorProdutoPorDia(
+                LocalDate.of(2025, 2, 1), LocalDate.of(2025, 1, 31)))
+                .isInstanceOf(IllegalArgumentException.class)
+                .hasMessageContaining("Data inicial");
+    }
+
+    @Test
+    @DisplayName("Nao deve chamar repositorio se houver parametro invalido")
+    void shouldNotCallRepositoryOnInvalidRange() {
+        assertThatThrownBy(() -> simulacaoService.buscarSimulacoesPorProdutoPorDia(
+                LocalDate.parse("2025-02-01"), LocalDate.parse("2025-01-01"))).isInstanceOf(IllegalArgumentException.class);
+
+        verifyNoInteractions(simulacaoRepository);
     }
 
     private ProdutoEntity produto() {

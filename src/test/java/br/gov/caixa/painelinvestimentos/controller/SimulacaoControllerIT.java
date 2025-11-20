@@ -20,6 +20,7 @@ import java.util.List;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.verifyNoInteractions;
 import static org.mockito.Mockito.when;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
@@ -107,5 +108,41 @@ class SimulacaoControllerIT {
         verify(simulacaoService).buscarSimulacoesPorProdutoPorDia(inicioCaptor.capture(), fimCaptor.capture());
         assertThat(inicioCaptor.getValue()).isEqualTo(LocalDate.parse("2025-10-01"));
         assertThat(fimCaptor.getValue()).isEqualTo(LocalDate.parse("2025-10-30"));
+    }
+
+    @Test
+    @DisplayName("GET /simulacoes/por-produto-dia sem parametros deve repassar nulos (usa periodo padrao no servico)")
+    void shouldForwardNullDatesWhenParamsOmitted() throws Exception {
+        when(simulacaoService.buscarSimulacoesPorProdutoPorDia(any(), any()))
+                .thenReturn(List.of());
+
+        mockMvc.perform(get("/simulacoes/por-produto-dia")
+                        .header("Authorization", "Bearer " + jwtService.generateToken("admin")))
+                .andExpect(status().isOk());
+
+        var inicioCaptor = org.mockito.ArgumentCaptor.forClass(LocalDate.class);
+        var fimCaptor = org.mockito.ArgumentCaptor.forClass(LocalDate.class);
+        verify(simulacaoService).buscarSimulacoesPorProdutoPorDia(inicioCaptor.capture(), fimCaptor.capture());
+        assertThat(inicioCaptor.getValue()).isNull();
+        assertThat(fimCaptor.getValue()).isNull();
+    }
+
+    @Test
+    @DisplayName("Deve negar acesso sem header Authorization")
+    void shouldRejectRequestsWithoutToken() throws Exception {
+        mockMvc.perform(get("/simulacoes"))
+                .andExpect(status().isForbidden());
+
+        verifyNoInteractions(simulacaoService);
+    }
+
+    @Test
+    @DisplayName("Deve negar acesso com token invalido")
+    void shouldRejectRequestsWithInvalidToken() throws Exception {
+        mockMvc.perform(get("/simulacoes")
+                        .header("Authorization", "Bearer token-invalido"))
+                .andExpect(status().isForbidden());
+
+        verifyNoInteractions(simulacaoService);
     }
 }
