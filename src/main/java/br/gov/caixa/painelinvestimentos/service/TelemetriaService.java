@@ -4,6 +4,7 @@ import br.gov.caixa.painelinvestimentos.model.dto.TelemetriaPeriodoDTO;
 import br.gov.caixa.painelinvestimentos.model.dto.TelemetriaResponseDTO;
 import br.gov.caixa.painelinvestimentos.model.dto.TelemetriaServicoDTO;
 import br.gov.caixa.painelinvestimentos.model.entity.TelemetriaEntity;
+import br.gov.caixa.painelinvestimentos.model.mapper.DtoMapper;
 import br.gov.caixa.painelinvestimentos.repository.TelemetriaRepository;
 import org.springframework.stereotype.Service;
 
@@ -56,25 +57,7 @@ public class TelemetriaService {
                         .collect(Collectors.groupingBy(TelemetriaEntity::getEndpoint))
                         .entrySet()
                         .stream()
-                        .map(entry -> {
-
-                            String endpoint = entry.getKey();
-                            List<TelemetriaEntity> lista = entry.getValue();
-
-                            TelemetriaServicoDTO dto = new TelemetriaServicoDTO();
-                            dto.setNome(endpoint);
-                            dto.setQuantidadeChamadas((long) lista.size());
-                            dto.setMediaTempoRespostaMs(
-                                    Math.round(
-                                            lista.stream()
-                                                    .mapToLong(TelemetriaEntity::getTempoRespostaMs)
-                                                    .average()
-                                                    .orElse(0)
-                                    )
-                            );
-
-                            return dto;
-                        })
+                        .map(entry -> DtoMapper.toTelemetriaServicoDTO(entry.getKey(), entry.getValue()))
                         .sorted(Comparator.comparing(TelemetriaServicoDTO::getNome))
                         .collect(Collectors.toList());
 

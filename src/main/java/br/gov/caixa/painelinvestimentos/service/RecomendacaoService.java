@@ -3,6 +3,7 @@ package br.gov.caixa.painelinvestimentos.service;
 import br.gov.caixa.painelinvestimentos.model.PerfilRisco;
 import br.gov.caixa.painelinvestimentos.model.dto.ProdutoRecomendadoDTO;
 import br.gov.caixa.painelinvestimentos.model.entity.ProdutoEntity;
+import br.gov.caixa.painelinvestimentos.model.mapper.DtoMapper;
 import br.gov.caixa.painelinvestimentos.repository.ProdutoRepository;
 import org.springframework.stereotype.Service;
 
@@ -30,14 +31,10 @@ public class RecomendacaoService {
 
         for (ProdutoEntity produto : produtos) {
             if (produtoCompativelComPerfil(perfil, produto)) {
-                ProdutoRecomendadoDTO dto = new ProdutoRecomendadoDTO();
-                dto.setId(produto.getId());
-                dto.setNome(produto.getNome());
-                dto.setTipo(produto.getTipo());
-                dto.setRisco(produto.getRisco());
-                dto.setRentabilidade(produto.getRentabilidade());
-                dto.setPontuacao(calcularPontuacao(perfil, produto));
-                recomendados.add(dto);
+                recomendados.add(DtoMapper.toProdutoRecomendadoDTO(
+                        produto,
+                        calcularPontuacao(perfil, produto)
+                ));
             }
         }
 

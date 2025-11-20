@@ -44,10 +44,10 @@ public class SimulacaoController {
             summary = "Nova simulação",
             description = "Processa os dados do cliente e retorna o produto validado e o resultado da simulação.",
             responses = {
-                    @ApiResponse(responseCode = "200", description = "Simulacao realizada",
+                    @ApiResponse(responseCode = "200", description = "Simulação realizada",
                             content = @Content(schema = @Schema(implementation = SimularInvestimentoResponseDTO.class))),
-                    @ApiResponse(responseCode = "400", description = "Payload invalido"),
-                    @ApiResponse(responseCode = "404", description = "Produto nao encontrado para o tipo informado")
+                    @ApiResponse(responseCode = "400", description = "Payload inválido"),
+                    @ApiResponse(responseCode = "404", description = "Produto não encontrado para o tipo informado")
             }
     )
     public ResponseEntity<SimularInvestimentoResponseDTO> simularInvestimento(
@@ -71,8 +71,8 @@ public class SimulacaoController {
     @Operation(
             summary = "Métricas por produto e dia",
             description = """
-                    Consolida as simulações por produto em cada dia do periodo informado.
-                    Se nao forem enviados parâmetros, retorna automaticamente os últimos 30 dias.
+                    Consolida as simulações por produto em cada dia do período informado.
+                    Se não forem enviados parâmetros, retorna automaticamente os últimos 30 dias.
                     """,
             responses = @ApiResponse(responseCode = "200",
                     content = @Content(schema = @Schema(implementation = SimulacoesPorProdutoDiaDTO.class)))

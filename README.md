@@ -1,7 +1,7 @@
 # Painel de Investimentos – Desafio Caixa
 
-> **Autor:** Luiz Souza  
-> **Objetivo:** disponibilizar uma API web que simula investimentos, ajusta o perfil de risco dinamicamente e recomenda produtos conforme os requisitos do PSI.
+> **Autor:** Luiz Carlos Mendes Souza  matrícula: c158806-0
+> **Objetivo:** disponibilizar uma API web que simula investimentos, ajusta o perfil de risco dinamicamente e recomenda produtos conforme os requisitos do PSI de Pleno/Sênior.
 
 ---
 
@@ -158,6 +158,6 @@ Evidencias adicionais: Swagger documenta contratos; Dockerfile/docker-compose pe
 1. Clonar/descompactar o projeto.
 2. `docker compose build && docker compose up`.
 3. `POST /auth/login` → copiar token → usar endpoints no Swagger.
-4. (Opcional) Rodar `mvn clean test` e abrir `target/site/jacoco/index.html` para conferir cobertura.
+4.  Rodar `mvn clean test` e abrir `target/site/jacoco/index.html` para conferir cobertura.
 
 Qualquer dúvida sobre o motor, perfil de risco ou arquitetura, estou à disposição. Obrigado pela avaliação! 💙
