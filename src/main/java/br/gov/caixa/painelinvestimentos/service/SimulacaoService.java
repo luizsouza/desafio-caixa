@@ -1,6 +1,11 @@
 package br.gov.caixa.painelinvestimentos.service;
 
-import br.gov.caixa.painelinvestimentos.model.dto.*;
+import br.gov.caixa.painelinvestimentos.model.dto.ProdutoValidadoDTO;
+import br.gov.caixa.painelinvestimentos.model.dto.ResultadoSimulacaoDTO;
+import br.gov.caixa.painelinvestimentos.model.dto.SimularInvestimentoRequestDTO;
+import br.gov.caixa.painelinvestimentos.model.dto.SimularInvestimentoResponseDTO;
+import br.gov.caixa.painelinvestimentos.model.dto.SimulacaoHistoricoDTO;
+import br.gov.caixa.painelinvestimentos.model.dto.SimulacoesPorProdutoDiaDTO;
 import br.gov.caixa.painelinvestimentos.model.entity.InvestimentoClienteEntity;
 import br.gov.caixa.painelinvestimentos.model.entity.ProdutoEntity;
 import br.gov.caixa.painelinvestimentos.model.entity.SimulacaoEntity;
@@ -38,12 +43,14 @@ public class SimulacaoService {
         this.investimentoRepository = investimentoRepository;
     }
 
-    // Todas as operações de banco de dados (salvar simulação e histórico)
-    // ocorrem de forma atômica. Ou tudo funciona, ou nada é salvo.
+    // Todas as operações de banco de dados (salvar simulação e histórico) ocorrem de forma atômica.
+
     @Transactional
     public SimularInvestimentoResponseDTO simularInvestimento(SimularInvestimentoRequestDTO request) {
         String tipoProduto = request.getTipoProduto().trim();
-        ProdutoEntity produto = produtoRepository.findByTipoIgnoreCase(tipoProduto)
+        ProdutoEntity produto = produtoRepository.findAll().stream()
+                .filter(p -> p.getTipo() != null && p.getTipo().equalsIgnoreCase(tipoProduto))
+                .findFirst()
                 .orElseThrow(() -> new IllegalArgumentException("Tipo de produto não encontrado: " + tipoProduto));
 
         double valorInvestido = arredondarDuasCasas(request.getValor());
@@ -80,14 +87,14 @@ public class SimulacaoService {
     public List<SimulacaoHistoricoDTO> listarHistorico() {
         return simulacaoRepository.findAll(Sort.by(Sort.Direction.DESC, "dataSimulacao"))
                 .stream()
-                .map(this::toSimulacaoHistoricoDTO) // Renomeando para clareza
+                .map(this::toSimulacaoHistoricoDTO)
                 .collect(Collectors.toList());
     }
 
     @Transactional(readOnly = true)
     public List<SimulacoesPorProdutoDiaDTO> buscarSimulacoesPorProdutoPorDia(LocalDate inicio, LocalDate fim) {
         // Lógica de fallback: se o usuário não informar as datas, é assumido um período padrão de 30 dias.
-        // Isso evita a necessidade de validações complexas no controller.
+        // Isso evita a necessidade de validações complexas no controller.        
         LocalDate fimConsulta = fim != null ? fim : LocalDate.now();
         LocalDate inicioConsulta = inicio != null ? inicio : fimConsulta.minusDays(30);
 
@@ -103,8 +110,8 @@ public class SimulacaoService {
         Map<ProdutoEntity, Map<LocalDate, List<SimulacaoEntity>>> agrupado = new java.util.HashMap<>();
         for (SimulacaoEntity sim : simulacoes) {
             agrupado.computeIfAbsent(sim.getProduto(), k -> new java.util.HashMap<>())
-                   .computeIfAbsent(sim.getDataSimulacao().toLocalDate(), k -> new ArrayList<>())
-                   .add(sim);
+                    .computeIfAbsent(sim.getDataSimulacao().toLocalDate(), k -> new ArrayList<>())
+                    .add(sim);
         }
 
         List<SimulacoesPorProdutoDiaDTO> resposta = new ArrayList<>();
@@ -134,7 +141,7 @@ public class SimulacaoService {
     }
 
     private double arredondarDuasCasas(double valor) {
-        // Usar BigDecimal é fundamental para cálculos financeiros para evitar os problemas
+        // Usando BigDecimal para cálculos financeiros para evitar os problemas
         // de precisão inerentes aos tipos float/double.
         return BigDecimal.valueOf(valor)
                 .setScale(2, RoundingMode.HALF_UP)
@@ -145,6 +152,7 @@ public class SimulacaoService {
      * Converte a entidade Simulacao para seu DTO de histórico.
      * Movido do DtoMapper para manter a lógica de mapeamento junto ao serviço que a utiliza.
      */
+
     private SimulacaoHistoricoDTO toSimulacaoHistoricoDTO(SimulacaoEntity simulacao) {
         SimulacaoHistoricoDTO dto = new SimulacaoHistoricoDTO();
         dto.setId(simulacao.getId());

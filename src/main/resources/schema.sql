@@ -86,27 +86,9 @@ SELECT 'CDB Caixa 2026', 'CDB', 0.12, 'BAIXO'
 WHERE NOT EXISTS (SELECT 1 FROM produtos WHERE nome = 'CDB Caixa 2026');
 
 INSERT INTO produtos (nome, tipo, rentabilidade, risco)
-SELECT 'Fundo XPTO', 'FUNDO', 0.18, 'MEDIO'
+SELECT 'Fundo XPTO', 'FUNDO', 0.18, 'MÉDIO'
 WHERE NOT EXISTS (SELECT 1 FROM produtos WHERE nome = 'Fundo XPTO');
 
 INSERT INTO produtos (nome, tipo, rentabilidade, risco)
-SELECT 'Acoes Arrojadas', 'ACOES', 0.25, 'ALTO'
-WHERE NOT EXISTS (SELECT 1 FROM produtos WHERE nome = 'Acoes Arrojadas');
-
----------------------------------------------------------------------------
--- HISTÓRICO DE INVESTIMENTOS EXEMPLO
----------------------------------------------------------------------------
-
-INSERT INTO investimentos_cliente (cliente_id, tipo, valor, rentabilidade, data)
-SELECT 123, 'CDB', 5000.00, 0.12, '2025-01-15'
-WHERE NOT EXISTS (
-    SELECT 1 FROM investimentos_cliente
-    WHERE cliente_id = 123 AND data = '2025-01-15' AND tipo = 'CDB'
-);
-
-INSERT INTO investimentos_cliente (cliente_id, tipo, valor, rentabilidade, data)
-SELECT 123, 'Fundo Multimercado', 3000.00, 0.08, '2025-03-10'
-WHERE NOT EXISTS (
-    SELECT 1 FROM investimentos_cliente
-    WHERE cliente_id = 123 AND data = '2025-03-10' AND tipo = 'Fundo Multimercado'
-);
+SELECT 'Ações Arrojadas', 'AÇÕES', 0.25, 'ALTO'
+WHERE NOT EXISTS (SELECT 1 FROM produtos WHERE nome = 'Ações Arrojadas');
