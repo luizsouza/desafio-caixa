@@ -49,4 +49,17 @@ class TelemetriaInterceptorTest {
         verify(telemetriaService).registrarExecucao(org.mockito.ArgumentMatchers.eq("/simulacoes"), duracao.capture());
         assertThat(duracao.getValue()).isGreaterThanOrEqualTo(0L);
     }
+
+    @Test
+    @DisplayName("Endpoints com path-params devem ser normalizados para o prefixo estatico")
+    void shouldNormalizeEndpointsWithPathVariables() {
+        MockHttpServletRequest request = new MockHttpServletRequest("GET", "/investimentos/123");
+        MockHttpServletResponse response = new MockHttpServletResponse();
+
+        interceptor.preHandle(request, response, new Object());
+        request.setAttribute("inicio_telemetria", System.currentTimeMillis() - 10);
+        interceptor.afterCompletion(request, response, new Object(), null);
+
+        verify(telemetriaService).registrarExecucao(org.mockito.ArgumentMatchers.eq("/investimentos"), org.mockito.ArgumentMatchers.anyLong());
+    }
 }

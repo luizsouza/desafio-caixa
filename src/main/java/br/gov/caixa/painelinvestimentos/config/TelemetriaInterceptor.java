@@ -10,23 +10,25 @@ import org.springframework.web.util.pattern.PathPattern;
 import org.springframework.web.util.pattern.PathPatternParser;
 
 import java.util.List;
+import java.util.Optional;
 
 @Component
 public class TelemetriaInterceptor implements HandlerInterceptor {
 
     private static final String INICIO_TELEMETRIA = "inicio_telemetria";
     private static final String MONITORAR_TELEMETRIA = "monitorar_telemetria";
+    private static final String ENDPOINT_NORMALIZADO = "endpoint_normalizado";
     private static final PathPatternParser PATH_PARSER = new PathPatternParser();
-    private static final List<PathPattern> ENDPOINTS_MONITORADOS = List.of(
-            PATH_PARSER.parse("/auth/login"),
-            PATH_PARSER.parse("/simular-investimento"),
-            PATH_PARSER.parse("/simulacoes"),
-            PATH_PARSER.parse("/simulacoes/por-produto-dia"),
-            PATH_PARSER.parse("/health"),
-            PATH_PARSER.parse("/produtos-recomendados/{perfil}"),
-            PATH_PARSER.parse("/perfil-risco/{clienteId}"),
-            PATH_PARSER.parse("/produtos"),
-            PATH_PARSER.parse("/investimentos/{clienteId}")
+    private static final List<EndpointMonitorado> ENDPOINTS_MONITORADOS = List.of(
+            endpoint("/auth/login", "/auth/login"),
+            endpoint("/simular-investimento", "/simular-investimento"),
+            endpoint("/simulacoes", "/simulacoes"),
+            endpoint("/simulacoes/por-produto-dia", "/simulacoes/por-produto-dia"),
+            endpoint("/health", "/health"),
+            endpoint("/produtos-recomendados/{perfil}", "/produtos-recomendados"),
+            endpoint("/perfil-risco/{clienteId}", "/perfil-risco"),
+            endpoint("/produtos", "/produtos"),
+            endpoint("/investimentos/{clienteId}", "/investimentos")
     );
 
     private final TelemetriaService telemetriaService;
@@ -38,13 +40,15 @@ public class TelemetriaInterceptor implements HandlerInterceptor {
     @Override
     public boolean preHandle(HttpServletRequest request, HttpServletResponse response, Object handler) {
 
-        if (!isEndpointMonitorado(request.getRequestURI())) {
+        Optional<EndpointMonitorado> endpoint = findEndpointMonitorado(request.getRequestURI());
+        if (endpoint.isEmpty()) {
             return true;
         }
 
         long inicio = System.currentTimeMillis();
         request.setAttribute(MONITORAR_TELEMETRIA, Boolean.TRUE);
         request.setAttribute(INICIO_TELEMETRIA, inicio);
+        request.setAttribute(ENDPOINT_NORMALIZADO, endpoint.get().canonical());
 
         return true;
     }
@@ -66,13 +70,20 @@ public class TelemetriaInterceptor implements HandlerInterceptor {
         long fim = System.currentTimeMillis();
         long duracao = fim - inicio;
 
-        telemetriaService.registrarExecucao(request.getRequestURI(), duracao);
+        String endpoint = (String) request.getAttribute(ENDPOINT_NORMALIZADO);
+        telemetriaService.registrarExecucao(endpoint != null ? endpoint : request.getRequestURI(), duracao);
     }
 
-    private boolean isEndpointMonitorado(String path) {
+    private Optional<EndpointMonitorado> findEndpointMonitorado(String path) {
         PathContainer pathContainer = PathContainer.parsePath(path);
-        return ENDPOINTS_MONITORADOS
-                .stream()
-                .anyMatch(pattern -> pattern.matches(pathContainer));
+        return ENDPOINTS_MONITORADOS.stream()
+                .filter(e -> e.pattern().matches(pathContainer))
+                .findFirst();
     }
+
+    private static EndpointMonitorado endpoint(String pattern, String canonical) {
+        return new EndpointMonitorado(PATH_PARSER.parse(pattern), canonical);
+    }
+
+    private record EndpointMonitorado(PathPattern pattern, String canonical) {}
 }
