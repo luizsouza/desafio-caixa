@@ -44,12 +44,12 @@ class RecomendacaoServiceTest {
         List<ProdutoRecomendadoDTO> recomendados = recomendacaoService.recomendarPorPerfil("agressivo");
 
         assertThat(recomendados).hasSize(3);
-        assertThat(recomendados.get(0).getNome()).isEqualTo("Acoes Arrojadas");
+        assertThat(recomendados.get(0).getNome()).isEqualTo("Ações Arrojadas");
         assertThat(recomendados.get(2).getNome()).isEqualTo("CDB Conservador");
     }
 
     @Test
-    @DisplayName("Perfil moderado deve trazer BAIXO e MEDIO e pontuar igual a rentabilidade")
+    @DisplayName("Perfil moderado deve trazer BAIXO e MÉDIO e pontuar igual à rentabilidade")
     void shouldFilterAndScoreModerateProfile() {
         when(produtoRepository.findAll()).thenReturn(criarProdutos());
 
@@ -83,13 +83,13 @@ class RecomendacaoServiceTest {
         moderado.setId(2L);
         moderado.setNome("Fundo Moderado");
         moderado.setTipo("FUNDO");
-        moderado.setRisco("MEDIO");
+        moderado.setRisco("MÉDIO");
         moderado.setRentabilidade(1.2);
 
         ProdutoEntity agressivo = new ProdutoEntity();
         agressivo.setId(3L);
-        agressivo.setNome("Acoes Arrojadas");
-        agressivo.setTipo("ACOES");
+        agressivo.setNome("Ações Arrojadas");
+        agressivo.setTipo("AÇÕES");
         agressivo.setRisco("ALTO");
         agressivo.setRentabilidade(2.0);
 

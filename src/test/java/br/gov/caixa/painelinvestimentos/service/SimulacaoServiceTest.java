@@ -21,7 +21,6 @@ import org.springframework.data.domain.Sort;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.List;
-import java.util.Optional;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
@@ -46,8 +45,7 @@ class SimulacaoServiceTest {
     @DisplayName("Deve realizar uma simulação válida, persistir o resultado e registrar o histórico do cliente")
     void shouldSimulateInvestment() {
         ProdutoEntity produto = produto();
-        when(produtoRepository.findByTipoIgnoreCase("CDB"))
-                .thenReturn(Optional.of(produto));
+        when(produtoRepository.findAll()).thenReturn(List.of(produto));
 
         SimularInvestimentoRequestDTO request = new SimularInvestimentoRequestDTO();
         request.setClienteId(10L);
@@ -71,8 +69,7 @@ class SimulacaoServiceTest {
     @Test
     @DisplayName("Deve informar quando o tipo de produto não existe")
     void shouldRejectUnknownProductType() {
-        when(produtoRepository.findByTipoIgnoreCase("desconhecido"))
-                .thenReturn(Optional.empty());
+        when(produtoRepository.findAll()).thenReturn(List.of(produto()));
 
         SimularInvestimentoRequestDTO request = new SimularInvestimentoRequestDTO();
         request.setClienteId(10L);

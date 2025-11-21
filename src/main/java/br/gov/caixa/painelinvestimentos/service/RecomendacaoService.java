@@ -43,10 +43,10 @@ public class RecomendacaoService {
     }
 
     private boolean produtoCompativelComPerfil(PerfilRisco perfil, ProdutoEntity produto) {
+        String risco = produto.getRisco();
         return switch (perfil) {
-            case CONSERVADOR -> produto.getRisco().equalsIgnoreCase("BAIXO");
-            case MODERADO -> produto.getRisco().equalsIgnoreCase("BAIXO") ||
-                             produto.getRisco().equalsIgnoreCase("MEDIO");
+            case CONSERVADOR -> risco != null && risco.equalsIgnoreCase("BAIXO");
+            case MODERADO -> risco != null && (risco.equalsIgnoreCase("BAIXO") || risco.equalsIgnoreCase("MÉDIO"));
             case AGRESSIVO -> true;
         };
     }

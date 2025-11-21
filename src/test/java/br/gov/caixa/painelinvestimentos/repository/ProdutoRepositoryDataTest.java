@@ -25,7 +25,7 @@ class ProdutoRepositoryDataTest {
         assertThat(todos).isNotEmpty();
         assertThat(todos)
                 .extracting(ProdutoEntity::getNome)
-                .contains("CDB Caixa 2026", "Fundo XPTO", "Acoes Arrojadas");
+                .contains("CDB Caixa 2026", "Fundo XPTO", "Ações Arrojadas");
 
         assertThat(produtoRepository.findByTipoIgnoreCase("cdb"))
                 .isPresent()

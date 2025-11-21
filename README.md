@@ -84,9 +84,9 @@ O SQLite versionado fica em `data/investimentos.db` (montado como volume para ma
 - Fluxo: cliente simula → perfil dinâmico em `/perfil-risco/{clienteId}` → recomendação por perfil.
 - Regras/pontuação:  
   - Conservador: risco BAIXO; `pontuacao = rentabilidade * 0.8`  
-  - Moderado: risco BAIXO ou MEDIO; `pontuacao = rentabilidade`  
+- Moderado: risco BAIXO ou MÉDIO; `pontuacao = rentabilidade`  
   - Agressivo: qualquer risco; `pontuacao = rentabilidade * 1.2`
-- Seeds (SQLite): CDB Caixa 2026 (BAIXO, 0.12), Fundo XPTO (MEDIO, 0.18), Ações Arrojadas (ALTO, 0.25). Ranking varia conforme o perfil calculado.
+- Seeds (SQLite): CDB Caixa 2026 (BAIXO, 0.12), Fundo XPTO (MÉDIO, 0.18), Ações Arrojadas (ALTO, 0.25). Ranking varia conforme o perfil calculado.
 
 ### 6.3 Perfil de risco dinâmico
 - `PerfilRiscoService` soma Volume + Frequência + Liquidez:  
