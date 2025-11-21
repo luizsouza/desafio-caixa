@@ -1,6 +1,6 @@
 # Painel de Investimentos – Desafio Caixa
 
-> **Autor:** Luiz Carlos Mendes Souza (c158806-0)  
+> **Autor:** Luiz Carlos Mendes Souza (c158806-0)  / e-mail: luiz.cm.souza@caixa.gov.br
 > **Objetivo:** API que simula investimentos, calcula perfil de risco dinâmico e recomenda produtos conforme o PSI Pleno/Sênior.
 
 ---
@@ -31,15 +31,23 @@ A API usa **Java 21 / Spring Boot 3.3**, com segurança **JWT**, banco **SQLite*
 ```bash
 git clone https://github.com/luizsouza/desafio-caixa.git
 cd desafio-caixa
-
-# Maven
-mvn clean install
-mvn spring-boot:run
-
-# Docker
-docker compose build
-docker compose up
 ```
+
+**Escolha uma opção para subir (Maven ou Docker):**
+
+- Maven (JDK/Maven instalados)
+  ```bash
+  mvn clean install
+  mvn spring-boot:run
+  ```
+
+- Docker (sem depender de Maven local)
+  ```bash
+  docker compose build
+  docker compose up
+  ```
+
+Depois de subir, acesse `http://localhost:8080/swagger-ui.html`, autentique em `/auth/login` com `admin/senha123` e navegue pelos endpoints.
 
 O SQLite versionado fica em `data/investimentos.db` (montado como volume para manter evidências).
 
@@ -132,6 +140,9 @@ O SQLite versionado fica em `data/investimentos.db` (montado como volume para ma
 | `ProdutoRepositoryDataTest` | Integração (@DataJpaTest) | Seeds reais (SQLite) e busca por tipo |
 
 Evidências extras: Swagger documenta contratos; Dockerfile/docker-compose garantem reprodutibilidade.
+
+## Cobertura de testes
+![Cobertura de testes](docs/coverage.png)
 
 ---
 
