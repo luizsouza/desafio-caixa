@@ -2,8 +2,6 @@ package br.gov.caixa.painelinvestimentos.config;
 
 import io.swagger.v3.oas.models.Components;
 import io.swagger.v3.oas.models.OpenAPI;
-import io.swagger.v3.oas.models.PathItem;
-import io.swagger.v3.oas.models.Paths;
 import io.swagger.v3.oas.models.media.Schema;
 import io.swagger.v3.oas.models.media.StringSchema;
 import io.swagger.v3.oas.models.parameters.Parameter;
@@ -64,27 +62,6 @@ public class OpenApiConfig {
                         }
                     })
             );
-        };
-    }
-
-    @Bean
-    public OpenApiCustomizer authEndpointOnTopCustomizer() {
-        return openApi -> {
-            if (openApi.getPaths() == null || !openApi.getPaths().containsKey("/auth/login")) {
-                return;
-            }
-
-            PathItem authPath = openApi.getPaths().get("/auth/login");
-            Paths reordered = new Paths();
-            reordered.addPathItem("/auth/login", authPath);
-
-            openApi.getPaths().forEach((path, item) -> {
-                if (!"/auth/login".equals(path)) {
-                    reordered.addPathItem(path, item);
-                }
-            });
-
-            openApi.setPaths(reordered);
         };
     }
 }
